@@ -66,4 +66,35 @@ final class SynthEngineCoreTests: XCTestCase {
         let tail = renderBlock(core, frames: 4096)
         XCTAssertTrue(tail.allSatisfy { abs($0) < 0.01 })
     }
+
+    /// Simulates an audio session interruption (phone call, Siri, etc.): nothing
+    /// should be left stuck sounding, whether a plain note or an arp is active.
+    func testAllNotesOffSilencesMonoVoiceQuickly() {
+        let core = makeCore()
+        core.setEchoVolume(0) // isolate from the (separately-tested) echo tail
+        core.noteOn(id: 1, frequency: 220)
+        _ = renderBlock(core, frames: 4096)
+
+        core.allNotesOff()
+        _ = renderBlock(core, frames: 4096) // let the fast fade complete
+        let tail = renderBlock(core, frames: 2048)
+        XCTAssertTrue(tail.allSatisfy { abs($0) < 0.01 })
+    }
+
+    func testAllNotesOffStopsArpeggiator() {
+        let core = makeCore()
+        core.setEchoVolume(0)
+        core.arpMode = .up
+        core.arpRate = 20
+        core.noteOn(id: 1, frequency: 220)
+        core.noteOn(id: 2, frequency: 440)
+        _ = renderBlock(core, frames: 8820)
+
+        core.allNotesOff()
+        _ = renderBlock(core, frames: 4096)
+        XCTAssertEqual(core.currentNoteId, -1)
+
+        let tail = renderBlock(core, frames: 8820) // well past a 20Hz arp step interval
+        XCTAssertTrue(tail.allSatisfy { abs($0) < 0.01 }, "arp should not resume stepping after allNotesOff")
+    }
 }

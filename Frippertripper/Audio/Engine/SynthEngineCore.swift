@@ -3,6 +3,7 @@ import Foundation
 private enum EngineCommand {
     case noteOn(id: Int, freq: Float)
     case noteOff(id: Int)
+    case allNotesOff
 }
 
 /// The fused monophonic voice chain: VCO+LFO -> VCF -> shared ADSR -> VCA -> dry/wet
@@ -157,6 +158,14 @@ final class SynthEngineCore: @unchecked Sendable {
         commandQueue.push(.noteOff(id: id))
     }
 
+    /// Force-silences everything (held notes, arp pools, the sounding voice) with a
+    /// fast fade rather than a hard click. No equivalent in the source app - iOS
+    /// audio interruptions (phone calls, Siri, etc.) have no web analog, so this
+    /// exists purely to guarantee nothing is left stuck sounding across one.
+    func allNotesOff() {
+        commandQueue.push(.allNotesOff)
+    }
+
     // MARK: - Echo/limiter setters (UI thread)
 
     /// 0 = dry only, 1 = wet only (equal-power crossfade).
@@ -193,6 +202,7 @@ final class SynthEngineCore: @unchecked Sendable {
             switch command {
             case .noteOn(let id, let freq): handleNoteOn(id: id, freq: freq)
             case .noteOff(let id): handleNoteOff(id: id)
+            case .allNotesOff: handleAllNotesOff()
             }
         }
 
@@ -319,6 +329,17 @@ final class SynthEngineCore: @unchecked Sendable {
             currentNoteId = -1
             release()
         }
+    }
+
+    private func handleAllNotesOff() {
+        heldNotes.removeAll()
+        arpPhysicallyHeld.removeAll()
+        arpLatched.removeAll()
+        arpClockRunning = false
+        arpVoiceSounding = false
+        currentNoteId = -1
+        vcaGateOpen = false
+        sharedEnvelope.triggerRelease(release: 0.01)
     }
 
     // MARK: - Arpeggiator (render thread only)

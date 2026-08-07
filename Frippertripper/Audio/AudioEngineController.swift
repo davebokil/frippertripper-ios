@@ -3,7 +3,7 @@ import AVFoundation
 /// Owns the AVAudioEngine graph: a single fused AVAudioSourceNode (backed by
 /// SynthEngineCore) -> mainMixerNode -> output. `SynthEngine` (the SwiftUI view
 /// model) drives `core` directly for parameters and note events; this type only
-/// owns the graph lifecycle and the AVAudioSession.
+/// owns the graph lifecycle, the AVAudioSession, and interruption handling.
 @MainActor
 final class AudioEngineController: ObservableObject {
     private let engine = AVAudioEngine()
@@ -39,6 +39,10 @@ final class AudioEngineController: ObservableObject {
         do {
             try engine.start()
             isRunning = true
+            sessionManager.startObserving(
+                onInterruptionBegan: { [weak self] in self?.handleInterruptionBegan() },
+                onInterruptionEnded: { [weak self] shouldResume in self?.handleInterruptionEnded(shouldResume: shouldResume) }
+            )
         } catch {
             print("AudioEngineController: failed to start engine: \(error)")
             engine.detach(node)
@@ -48,9 +52,29 @@ final class AudioEngineController: ObservableObject {
 
     func stop() {
         guard isRunning else { return }
+        sessionManager.stopObserving()
         engine.stop()
         sessionManager.deactivate()
         isRunning = false
+    }
+
+    /// A phone call, Siri, another app's audio, etc. - no equivalent existed in the
+    /// source web app. `engine.pause()` (not `stop()`) keeps the graph attached so
+    /// resuming is just `engine.start()` again, no node rebuild needed. Force-silence
+    /// first so nothing is left stuck sounding for the interruption's duration.
+    private func handleInterruptionBegan() {
+        core.allNotesOff()
+        engine.pause()
+    }
+
+    private func handleInterruptionEnded(shouldResume: Bool) {
+        guard isRunning, shouldResume else { return }
+        do {
+            try sessionManager.activate()
+            try engine.start()
+        } catch {
+            print("AudioEngineController: failed to resume after interruption: \(error)")
+        }
     }
 
     /// `nonisolated` (and `static`, so it captures no `self`) so the returned closure

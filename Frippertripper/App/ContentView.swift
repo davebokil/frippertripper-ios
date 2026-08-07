@@ -11,6 +11,7 @@ struct ContentView: View {
     @State private var isKeyboardOpen = false
     @State private var isFxPresented = false
     @State private var isPresetsPresented = false
+    @State private var isAboutPresented = false
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -45,6 +46,9 @@ struct ContentView: View {
         .sheet(isPresented: $isPresetsPresented) {
             PresetsView(engine: engine, presetStore: presetStore)
         }
+        .sheet(isPresented: $isAboutPresented) {
+            AboutView()
+        }
         .preferredColorScheme(.dark)
         .onAppear {
             engine.audioEngineController.start()
@@ -61,6 +65,7 @@ struct ContentView: View {
             PageSelectorView(selectedPage: $selectedPage)
             toolbarIconButton(systemName: "square.stack.3d.up") { isPresetsPresented = true }
             toolbarIconButton(systemName: "waveform.path.ecg") { isFxPresented = true }
+            toolbarIconButton(systemName: "info.circle") { isAboutPresented = true }
         }
         .padding(.horizontal, 14)
         .padding(.top, 8)
