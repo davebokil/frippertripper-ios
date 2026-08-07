@@ -1,3 +1,14 @@
+# Xcode (project is generated from project.yml via `xcodegen generate` — see README)
+Generated/
+*.xcodeproj/
+xcuserdata/
+*.xcuserstate
+DerivedData/
+.build/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
 # Logs
 logs
 *.log
