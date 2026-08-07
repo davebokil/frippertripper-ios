@@ -2,9 +2,10 @@ import Foundation
 
 /// Octave-switch positions on the VCO, mirroring the source app's `VcoRange`
 /// (`app/composables/useAudioEngine.ts`). Raw values are the octave offset used by
-/// `computeVcoFrequency`, matching `RANGE_OCTAVE`.
-enum VcoRange: Equatable {
-    case sixteen, eight, four, two
+/// `computeVcoFrequency`, matching `RANGE_OCTAVE`. String-raw-valued (rather than a
+/// plain enum) so it round-trips through `SynthPreset`'s JSON encoding.
+enum VcoRange: String, Codable, Equatable {
+    case sixteen = "16", eight = "8", four = "4", two = "2"
 
     var octaveOffset: Float {
         switch self {
@@ -16,18 +17,22 @@ enum VcoRange: Equatable {
     }
 }
 
-enum PwmSource: Equatable {
+enum PwmSource: String, Codable, Equatable {
     case manual, env, lfo
 }
 
-enum SubMode: Equatable {
+enum SubMode: String, Codable, Equatable {
     case minus1Square, minus2Square, minus2Pulse
 }
 
-enum VcaMode: Equatable {
+enum VcaMode: String, Codable, Equatable {
     case env, gate
 }
 
-enum LfoWaveform: Equatable {
+enum LfoWaveform: String, Codable, Equatable {
     case triangle, square, sh, noise
+}
+
+enum ArpMode: String, Codable, Equatable {
+    case off, down, updown, up
 }

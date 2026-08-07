@@ -39,6 +39,23 @@ final class SynthEngineCore: @unchecked Sendable {
     private var heldNotes: [(id: Int, freq: Float)] = []
     private var vcaGateOpen = false
 
+    // Arpeggiator note pools - kept separate from `heldNotes` so plain monophonic
+    // play behaves normally while arpMode is .off, matching the source's
+    // `arpPhysicallyHeld`/`arpLatched` split. Render-thread only.
+    private var arpPhysicallyHeld: [Int: Float] = [:]
+    private var arpLatched: [Int: Float] = [:]
+    private var arpStepIndex = -1
+    private var arpVoiceSounding = false
+    private var arpClockRunning = false
+    private var arpSamplesUntilNextStep = 0
+    private var lastArpMode: ArpMode = .off
+    private var lastArpHold = false
+
+    /// Id of the note currently sounding (mono voice or current arp step), -1 if
+    /// silent. Single-word read, safe from the UI thread for key-highlighting under
+    /// the same thread-safety rationale as `limiterReductionDb`.
+    private(set) var currentNoteId = -1
+
     // --- VCO/mixer/filter glide targets (Web Audio AudioParam equivalents) ---
     private let frequencyParam = RampedParameter(220)
     private let cutoffBaseParam = RampedParameter(3500)
@@ -94,6 +111,10 @@ final class SynthEngineCore: @unchecked Sendable {
     var decaySeconds: Float = 0.15
     var sustainLevel: Float = 0.7
     var releaseSeconds: Float = 0.3
+    var arpMode: ArpMode = .off
+    var arpOctaves: Int = 1
+    var arpHold = false
+    var arpRate: Float = 5 // steps/sec
 
     // Last-seen values of the "live retune" watch group (mirrors the source's
     // `watch([vcoRange, vcoTune, benderPosition, benderVcoSens, benderVcfSens,
@@ -176,6 +197,7 @@ final class SynthEngineCore: @unchecked Sendable {
         }
 
         applyLiveRetuneIfNeeded()
+        applyArpModeTransitionIfNeeded()
 
         for frame in 0..<frameCount {
             buffer[frame] = renderSample()
@@ -183,6 +205,8 @@ final class SynthEngineCore: @unchecked Sendable {
     }
 
     private func renderSample() -> Float {
+        advanceArpClockIfNeeded()
+
         let freq = frequencyParam.advance()
         let cutoffBase = cutoffBaseParam.advance()
 
@@ -249,19 +273,132 @@ final class SynthEngineCore: @unchecked Sendable {
         return limited * ceiling
     }
 
-    // MARK: - Monophonic note stack (render thread only)
+    // MARK: - Note dispatch: plain monophonic play vs. arpeggiator pool (render thread only)
 
     private func handleNoteOn(id: Int, freq: Float) {
-        heldNotes.removeAll { $0.id == id }
-        heldNotes.append((id: id, freq: freq))
-        attack(freq: freq)
+        if arpMode != .off {
+            arpPhysicallyHeld[id] = freq
+            if !arpClockRunning {
+                // mirrors the source's `startArpIfNeeded()`: fire the first step
+                // immediately rather than waiting out a full step interval.
+                arpClockRunning = true
+                arpStepIndex = -1
+                arpSamplesUntilNextStep = 0
+            }
+        } else {
+            monoNoteOn(id: id, freq: freq)
+        }
     }
 
     private func handleNoteOff(id: Int) {
+        if arpMode != .off {
+            if arpHold {
+                if let freq = arpPhysicallyHeld[id] { arpLatched[id] = freq }
+            } else {
+                arpLatched.removeValue(forKey: id)
+            }
+            arpPhysicallyHeld.removeValue(forKey: id)
+        } else {
+            monoNoteOff(id: id)
+        }
+    }
+
+    private func monoNoteOn(id: Int, freq: Float) {
+        heldNotes.removeAll { $0.id == id }
+        heldNotes.append((id: id, freq: freq))
+        currentNoteId = id
+        attack(freq: freq)
+    }
+
+    private func monoNoteOff(id: Int) {
         heldNotes.removeAll { $0.id == id }
         if let top = heldNotes.last {
+            currentNoteId = top.id
             attack(freq: top.freq)
         } else {
+            currentNoteId = -1
+            release()
+        }
+    }
+
+    // MARK: - Arpeggiator (render thread only)
+
+    private func advanceArpClockIfNeeded() {
+        guard arpMode != .off, arpClockRunning else { return }
+        if arpSamplesUntilNextStep <= 0 {
+            arpTick()
+            arpSamplesUntilNextStep = max(Int(sampleRate / Double(max(arpRate, 0.1))), 1)
+        } else {
+            arpSamplesUntilNextStep -= 1
+        }
+    }
+
+    private func arpTick() {
+        let sequence = buildArpSequence()
+        guard !sequence.isEmpty else {
+            silenceArpVoice()
+            arpClockRunning = false
+            return
+        }
+        arpStepIndex = (arpStepIndex + 1) % sequence.count
+        let step = sequence[arpStepIndex]
+        attack(freq: step.freq)
+        currentNoteId = step.id
+        arpVoiceSounding = true
+    }
+
+    private func silenceArpVoice() {
+        if arpVoiceSounding {
+            release()
+            currentNoteId = -1
+        }
+        arpVoiceSounding = false
+    }
+
+    private func buildArpSequence() -> [(id: Int, freq: Float)] {
+        var merged: [Int: Float] = [:]
+        for (id, freq) in arpLatched { merged[id] = freq }
+        for (id, freq) in arpPhysicallyHeld { merged[id] = freq }
+        let notes = merged.map { (id: $0.key, freq: $0.value) }.sorted { $0.freq < $1.freq }
+        guard !notes.isEmpty else { return [] }
+
+        var withOctaves: [(id: Int, freq: Float)] = []
+        for octave in 0..<max(arpOctaves, 1) {
+            for note in notes {
+                withOctaves.append((id: note.id, freq: note.freq * pow(2, Float(octave))))
+            }
+        }
+
+        switch arpMode {
+        case .down:
+            return withOctaves.reversed()
+        case .updown:
+            guard withOctaves.count > 1 else { return withOctaves }
+            return withOctaves + withOctaves[1..<(withOctaves.count - 1)].reversed()
+        case .up, .off:
+            return withOctaves
+        }
+    }
+
+    private func applyArpModeTransitionIfNeeded() {
+        if arpHold != lastArpHold {
+            if !arpHold { arpLatched.removeAll() }
+            lastArpHold = arpHold
+        }
+
+        guard arpMode != lastArpMode else { return }
+        defer { lastArpMode = arpMode }
+
+        if arpMode == .off {
+            silenceArpVoice()
+            arpClockRunning = false
+            arpPhysicallyHeld.removeAll()
+            arpLatched.removeAll()
+        } else if lastArpMode == .off, !heldNotes.isEmpty {
+            // switching into an arp mode - don't leave a plain sustained note
+            // ringing underneath it.
+            heldNotes.removeAll()
+            currentNoteId = -1
             release()
         }
     }

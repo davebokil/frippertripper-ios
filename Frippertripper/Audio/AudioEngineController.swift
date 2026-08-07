@@ -1,19 +1,15 @@
 import AVFoundation
 
 /// Owns the AVAudioEngine graph: a single fused AVAudioSourceNode (backed by
-/// SynthEngineCore) -> mainMixerNode -> output. Delay/limiter are appended
-/// downstream of this in Phase 4; the full parameter surface is wired to real
-/// SwiftUI controls in Phase 5 (this controller currently only exposes a single
-/// throwaway test note for Phase 2/3 validation).
+/// SynthEngineCore) -> mainMixerNode -> output. `SynthEngine` (the SwiftUI view
+/// model) drives `core` directly for parameters and note events; this type only
+/// owns the graph lifecycle and the AVAudioSession.
 @MainActor
 final class AudioEngineController: ObservableObject {
     private let engine = AVAudioEngine()
     let core = SynthEngineCore()
     private let sessionManager = AVAudioSessionManager()
     private var sourceNode: AVAudioSourceNode?
-
-    /// Fixed id for the single throwaway test note used by the Phase 2/3 UI.
-    private let testNoteId = 0
 
     @Published private(set) var isRunning = false
 
@@ -52,18 +48,9 @@ final class AudioEngineController: ObservableObject {
 
     func stop() {
         guard isRunning else { return }
-        core.noteOff(id: testNoteId)
         engine.stop()
         sessionManager.deactivate()
         isRunning = false
-    }
-
-    func noteOn(frequency: Double) {
-        core.noteOn(id: testNoteId, frequency: Float(frequency))
-    }
-
-    func noteOff() {
-        core.noteOff(id: testNoteId)
     }
 
     /// `nonisolated` (and `static`, so it captures no `self`) so the returned closure

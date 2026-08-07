@@ -1,62 +1,100 @@
 import SwiftUI
 
-/// Phase 2 throwaway UI: validates the AVAudioEngine plumbing end-to-end with a
-/// single hold-to-play tone. Replaced by the full front-panel/keyboard/FX surface
-/// in Phase 5.
+/// Root layout: the full-screen front panel is the base layer (playable immediately
+/// on launch, no landing/about page), with a top toolbar (page selector + FX button)
+/// and a floating keyboard-reveal button overlaid - matching the product shape from
+/// the plan.
 struct ContentView: View {
-    @EnvironmentObject private var engine: AudioEngineController
-    @State private var isHolding = false
+    @State private var engine = SynthEngine()
+    @State private var presetStore = PresetStore()
+    @State private var selectedPage = 0
+    @State private var isKeyboardOpen = false
+    @State private var isFxPresented = false
+    @State private var isPresetsPresented = false
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            VStack(spacing: 24) {
-                Text("Frippertripper")
-                    .font(.title.bold())
-                    .foregroundStyle(.white)
+            VStack(spacing: 0) {
+                topToolbar
+                FrontPanelPagerView(engine: engine, selectedPage: $selectedPage)
+            }
 
-                Text("Phase 3 scaffold — prime the engine, then hold the circle to play the full VCO/VCF/envelope voice at 220Hz.")
-                    .font(.footnote)
-                    .foregroundStyle(.gray)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-
-                Button {
-                    engine.start()
-                } label: {
-                    Text(engine.isRunning ? "Engine Running" : "Prime Engine")
-                        .font(.headline)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background((engine.isRunning ? Color.green : Color.blue).opacity(0.3))
-                        .foregroundStyle(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+            if !isKeyboardOpen {
+                VStack {
+                    Spacer()
+                    keyboardRevealButton
                 }
-                .padding(.horizontal, 40)
+                .padding()
+            }
 
-                Circle()
-                    .fill(isHolding ? Color.orange : Color.gray.opacity(0.3))
-                    .frame(width: 140, height: 140)
-                    .overlay(Text("HOLD").font(.headline).foregroundStyle(.white))
-                    .gesture(
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { _ in
-                                guard !isHolding else { return }
-                                isHolding = true
-                                engine.noteOn(frequency: 220)
-                            }
-                            .onEnded { _ in
-                                isHolding = false
-                                engine.noteOff()
-                            }
-                    )
+            if isKeyboardOpen {
+                VStack {
+                    Spacer()
+                    KeyboardDrawerView(engine: engine, isPresented: $isKeyboardOpen)
+                }
+                .transition(.move(edge: .bottom))
+                .zIndex(1)
             }
         }
+        .sheet(isPresented: $isFxPresented) {
+            FxPanelView(engine: engine)
+        }
+        .sheet(isPresented: $isPresetsPresented) {
+            PresetsView(engine: engine, presetStore: presetStore)
+        }
+        .preferredColorScheme(.dark)
+        .onAppear {
+            engine.audioEngineController.start()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase != .active {
+                engine.audioEngineController.stop()
+            }
+        }
+    }
+
+    private var topToolbar: some View {
+        HStack(spacing: 10) {
+            PageSelectorView(selectedPage: $selectedPage)
+            toolbarIconButton(systemName: "square.stack.3d.up") { isPresetsPresented = true }
+            toolbarIconButton(systemName: "waveform.path.ecg") { isFxPresented = true }
+        }
+        .padding(.horizontal, 14)
+        .padding(.top, 8)
+        .padding(.bottom, 4)
+    }
+
+    private func toolbarIconButton(systemName: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: 36, height: 36)
+                .background(Color(white: 0.14))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+        }
+    }
+
+    private var keyboardRevealButton: some View {
+        Button {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                isKeyboardOpen = true
+            }
+        } label: {
+            Image(systemName: "pianokeys")
+                .font(.title2)
+                .foregroundStyle(.white)
+                .frame(width: 56, height: 56)
+                .background(.ultraThinMaterial)
+                .clipShape(Circle())
+        }
+        .padding(.bottom, 4)
     }
 }
 
 #Preview {
     ContentView()
-        .environmentObject(AudioEngineController())
 }

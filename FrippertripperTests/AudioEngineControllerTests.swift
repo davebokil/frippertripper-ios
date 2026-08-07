@@ -20,9 +20,9 @@ final class AudioEngineControllerTests: XCTestCase {
         // Give the real-time thread several render callbacks to execute.
         try await Task.sleep(nanoseconds: 300_000_000)
 
-        controller.noteOn(frequency: 220)
+        controller.core.noteOn(id: 0, frequency: 220)
         try await Task.sleep(nanoseconds: 300_000_000)
-        controller.noteOff()
+        controller.core.noteOff(id: 0)
         try await Task.sleep(nanoseconds: 100_000_000)
 
         controller.stop()
