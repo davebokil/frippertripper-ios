@@ -133,15 +133,29 @@ struct PianoKeyboardView: View {
 
     private func whiteKeyColor(note: PianoNote, soundingId: Int) -> Color {
         if soundingId == note.id { return .brandOrange.opacity(0.55) }
-        if latchedNoteIds.contains(note.id) { return .brandOrange.opacity(0.25) }
+        if latchedNoteIds.contains(note.id) { return Self.latchedKeyColor }
         return .brandOrange
     }
 
     private func blackKeyColor(note: PianoNote, soundingId: Int) -> Color {
-        if soundingId == note.id { return .brandOrange }
-        if latchedNoteIds.contains(note.id) { return .brandOrange.opacity(0.6) }
+        if soundingId == note.id { return Self.soundingBlackKeyColor }
+        if latchedNoteIds.contains(note.id) { return Self.latchedKeyColor }
         return .black
     }
+
+    /// Latched-but-not-currently-sounding keys (Hold mode) get this same solid grey
+    /// on both key colors, so "held" reads as one consistent state regardless of
+    /// which key it's on - distinct from black's idle color and from the bright
+    /// orange "currently sounding" color on either key.
+    private static let latchedKeyColor = Color(white: 0.35)
+
+    /// A black key sits on top of the (now orange, since it matches the app icon)
+    /// white keys in the ZStack, so a translucent orange fill here would blend with
+    /// that orange backdrop and resolve right back to plain orange - invisible as a
+    /// distinct "sounding" state. This is `brandOrange` pre-blended at 40% over
+    /// black as an opaque color instead, so it reads correctly regardless of what's
+    /// underneath.
+    private static let soundingBlackKeyColor = Color(red: 0.4, green: 0.4 * 130 / 255, blue: 0.4 * 20 / 255)
 
     private func blackKeyXOffset(for note: PianoNote, whiteWidth: CGFloat, blackWidth: CGFloat) -> CGFloat {
         let precedingWhiteIndex = whiteNotes.lastIndex { $0.id < note.id } ?? 0

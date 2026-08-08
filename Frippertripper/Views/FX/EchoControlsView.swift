@@ -22,6 +22,11 @@ struct EchoControlsView: View {
                     Spacer()
                 }
                 .frame(height: 120)
+                VStack {
+                    PanelButtonView(label: "Clear") { engine.clearEcho() }
+                    Spacer()
+                }
+                .frame(height: 120)
             }
         }
     }

@@ -21,9 +21,9 @@ final class SynthEngine {
     var vcoPwmSource: PwmSource = .manual { didSet { core.vcoPwmSource = vcoPwmSource } }
 
     // MARK: - Source mixer
-    var mixSawLevel: Float = 0 { didSet { core.mixSawLevelParam.setTarget(mixSawLevel, tau: 0.01) } }
-    var mixPulseLevel: Float = 0.7 { didSet { core.mixPulseLevelParam.setTarget(mixPulseLevel, tau: 0.01) } }
-    var mixSubLevel: Float = 0 { didSet { core.mixSubLevelParam.setTarget(mixSubLevel, tau: 0.01) } }
+    var mixSawLevel: Float = 0.45 { didSet { core.mixSawLevelParam.setTarget(mixSawLevel, tau: 0.01) } }
+    var mixPulseLevel: Float = 0.45 { didSet { core.mixPulseLevelParam.setTarget(mixPulseLevel, tau: 0.01) } }
+    var mixSubLevel: Float = 0.4 { didSet { core.mixSubLevelParam.setTarget(mixSubLevel, tau: 0.01) } }
     var mixNoiseLevel: Float = 0 { didSet { core.mixNoiseLevelParam.setTarget(mixNoiseLevel, tau: 0.01) } }
     var mixSubMode: SubMode = .minus1Square { didSet { core.mixSubMode = mixSubMode } }
 
@@ -82,6 +82,12 @@ final class SynthEngine {
 
     func noteOff(id: Int) {
         core.noteOff(id: id)
+    }
+
+    /// Cuts short any ringing echo repeats without touching the dry signal, held
+    /// notes, or any front-panel setting.
+    func clearEcho() {
+        core.clearEcho()
     }
 
     // MARK: - Randomize

@@ -23,6 +23,12 @@ final class DelayLine: @unchecked Sendable {
         writeIndex = 0
     }
 
+    /// Silences any ringing repeats without touching `writeIndex` - render-thread
+    /// only, same as `process(_:)`, so no synchronization is needed against it.
+    func clear() {
+        for i in buffer.indices { buffer[i] = 0 }
+    }
+
     /// Writes `input + feedbackGain * delayedRead` into the ring buffer and returns
     /// the delayed sample read `delayTimeSeconds` behind the write head.
     ///

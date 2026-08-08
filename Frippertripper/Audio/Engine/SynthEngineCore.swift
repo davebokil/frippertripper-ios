@@ -4,6 +4,7 @@ private enum EngineCommand {
     case noteOn(id: Int, freq: Float)
     case noteOff(id: Int)
     case allNotesOff
+    case clearEcho
 }
 
 /// The fused monophonic voice chain: VCO+LFO -> VCF -> shared ADSR -> VCA -> dry/wet
@@ -64,9 +65,9 @@ final class SynthEngineCore: @unchecked Sendable {
     // --- Smoothed continuous parameters (equivalent to the source's setTargetAtTime
     // watchers, tau = 0.01s unless noted) ---
     let vcoPulseWidthParam = RampedParameter(0.5)
-    let mixSawLevelParam = RampedParameter(0)
-    let mixPulseLevelParam = RampedParameter(0.7)
-    let mixSubLevelParam = RampedParameter(0)
+    let mixSawLevelParam = RampedParameter(0.45)
+    let mixPulseLevelParam = RampedParameter(0.45)
+    let mixSubLevelParam = RampedParameter(0.4)
     let mixNoiseLevelParam = RampedParameter(0)
     let filterResonanceParam = RampedParameter(0.3)
     let filterEnvAmountParam = RampedParameter(0)
@@ -166,6 +167,14 @@ final class SynthEngineCore: @unchecked Sendable {
         commandQueue.push(.allNotesOff)
     }
 
+    /// Empties the delay line's ring buffer, silencing any repeats already in
+    /// flight - lets a held-over echo tail be cut short instead of waiting out its
+    /// natural decay. Queued rather than called directly since `buffer` is only
+    /// ever touched from the render thread (see `DelayLine.clear()`).
+    func clearEcho() {
+        commandQueue.push(.clearEcho)
+    }
+
     // MARK: - Echo/limiter setters (UI thread)
 
     /// 0 = dry only, 1 = wet only (equal-power crossfade).
@@ -203,6 +212,7 @@ final class SynthEngineCore: @unchecked Sendable {
             case .noteOn(let id, let freq): handleNoteOn(id: id, freq: freq)
             case .noteOff(let id): handleNoteOff(id: id)
             case .allNotesOff: handleAllNotesOff()
+            case .clearEcho: delayLine.clear()
             }
         }
 
