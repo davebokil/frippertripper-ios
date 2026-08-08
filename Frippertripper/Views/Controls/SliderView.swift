@@ -24,7 +24,7 @@ struct SliderView: View {
                     RoundedRectangle(cornerRadius: 4)
                         .fill(Color(white: 0.14))
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.orange.opacity(0.7))
+                        .fill(Color.brandOrange.opacity(0.7))
                         .frame(
                             width: orientation == .vertical ? nil : max(trackLength * fraction, 4),
                             height: orientation == .vertical ? max(trackLength * fraction, 4) : nil

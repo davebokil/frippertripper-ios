@@ -5,7 +5,7 @@ struct ArpPanelView: View {
 
     var body: some View {
         PanelSection(title: "Arpeggiator") {
-            HStack(spacing: 18) {
+            HStack(alignment: .top, spacing: 18) {
                 ToggleSwitchView(label: "Mode", selection: $engine.arpMode, options: [.off, .up, .down, .updown]) {
                     switch $0 {
                     case .off: "Off"

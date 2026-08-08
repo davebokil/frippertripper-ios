@@ -26,13 +26,8 @@ struct PresetsView: View {
                         engine.apply(preset)
                         dismiss()
                     } label: {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(preset.name)
-                                .foregroundStyle(.primary)
-                            Text(preset.createdAt.formatted(date: .abbreviated, time: .shortened))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
+                        Text(preset.name)
+                            .foregroundStyle(.primary)
                     }
                     .swipeActions {
                         Button(role: .destructive) {

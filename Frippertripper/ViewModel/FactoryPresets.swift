@@ -9,7 +9,7 @@ import Foundation
 enum FactoryPresets {
     private static let referenceDate = Date(timeIntervalSince1970: 1_700_000_000)
 
-    static let all: [SynthPreset] = [warmPad, aggressiveArpBass, bellPluck, ambientDrone, classicLead]
+    static let all: [SynthPreset] = [warmPad, aggressiveArpBass, bellPluck, ambientDrone, classicLead, frippertripperLooper]
 
     static let warmPad = SynthPreset(
         id: UUID(uuidString: "3ECB2E8A-938C-4026-B168-31F7AF6F193C")!,
@@ -84,5 +84,20 @@ enum FactoryPresets {
         benderVcoSens: 2, benderVcfSens: 1, portamentoTime: 0.12, portamentoOn: true,
         echoVolume: 0.25, echoTime: 0.25, echoRepeat: 0.25,
         limiterThreshold: -4, limiterCeiling: 0
+    )
+
+    static let frippertripperLooper = SynthPreset(
+        id: UUID(uuidString: "FD6C8C1F-9601-4718-9833-81F0742DD94E")!,
+        name: "Frippertripper Looper", createdAt: referenceDate,
+        vcoRange: .eight, vcoTune: 0, vcoPulseWidth: 0.7, vcoPwmSource: .lfo,
+        mixSawLevel: 0.36, mixPulseLevel: 0.34, mixSubLevel: 0.38, mixNoiseLevel: 0.14, mixSubMode: .minus2Square,
+        filterCutoff: 949, filterResonance: 0.44, filterEnvAmount: -0.31, filterLfoOn: true, filterKeyFollow: 0.28,
+        attack: 1.44, decay: 0.406, sustain: 0.83, release: 0.384,
+        vcaMode: .env,
+        lfoWaveform: .triangle, lfoRate: 0.1, lfoDepth: 0.82, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 2, benderVcfSens: 0, portamentoTime: 0.15, portamentoOn: false,
+        echoVolume: 0.58, echoTime: 4.0, echoRepeat: 1.0,
+        limiterThreshold: -2, limiterCeiling: -1
     )
 }

@@ -132,14 +132,14 @@ struct PianoKeyboardView: View {
     }
 
     private func whiteKeyColor(note: PianoNote, soundingId: Int) -> Color {
-        if soundingId == note.id { return .orange.opacity(0.55) }
-        if latchedNoteIds.contains(note.id) { return .orange.opacity(0.25) }
-        return .white
+        if soundingId == note.id { return .brandOrange.opacity(0.55) }
+        if latchedNoteIds.contains(note.id) { return .brandOrange.opacity(0.25) }
+        return .brandOrange
     }
 
     private func blackKeyColor(note: PianoNote, soundingId: Int) -> Color {
-        if soundingId == note.id { return .orange }
-        if latchedNoteIds.contains(note.id) { return .orange.opacity(0.6) }
+        if soundingId == note.id { return .brandOrange }
+        if latchedNoteIds.contains(note.id) { return .brandOrange.opacity(0.6) }
         return .black
     }
 

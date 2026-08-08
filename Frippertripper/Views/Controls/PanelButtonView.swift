@@ -12,7 +12,7 @@ struct PanelButtonView: View {
             Text(label)
                 .font(.system(size: 11, weight: .semibold))
                 .frame(minWidth: 64, minHeight: 36)
-                .background(isOn ? Color.orange.opacity(0.75) : Color(white: 0.16))
+                .background(isOn ? Color.brandOrange.opacity(0.75) : Color(white: 0.16))
                 .foregroundStyle(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
         }

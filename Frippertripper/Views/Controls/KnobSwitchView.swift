@@ -24,7 +24,7 @@ struct KnobSwitchView<Option: Equatable>: View {
                     .fill(LinearGradient(colors: [Color(white: 0.22), Color(white: 0.12)], startPoint: .top, endPoint: .bottom))
                     .overlay(Circle().stroke(Color(white: 0.35), lineWidth: 1))
                 Capsule()
-                    .fill(Color.orange)
+                    .fill(Color.brandOrange)
                     .frame(width: 3, height: size * 0.32)
                     .offset(y: -size * 0.22)
                     .rotationEffect(.degrees(angleDegrees(for: currentIndex)))

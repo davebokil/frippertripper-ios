@@ -12,7 +12,7 @@ struct EchoControlsView: View {
                         .frame(height: 120)
                     Text(repeatCountLabel(engine.echoRepeat))
                         .font(.system(size: 13, weight: .semibold, design: .monospaced))
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(Color.brandOrange)
                         .frame(minWidth: 24, alignment: .leading)
                 }
                 KnobView(label: "Time", value: $engine.echoTime, range: 0...4, formatter: { String(format: "%.2fs", $0) })

@@ -18,7 +18,7 @@ struct PageSelectorView: View {
                         .minimumScaleFactor(0.8)
                         .padding(.vertical, 8)
                         .frame(maxWidth: .infinity)
-                        .background(selectedPage == index ? Color.orange.opacity(0.85) : Color(white: 0.14))
+                        .background(selectedPage == index ? Color.brandOrange.opacity(0.85) : Color(white: 0.14))
                         .foregroundStyle(selectedPage == index ? .black : .white.opacity(0.75))
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                 }

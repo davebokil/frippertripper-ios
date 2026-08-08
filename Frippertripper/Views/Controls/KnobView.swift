@@ -26,7 +26,7 @@ struct KnobView: View {
                     )
                     .overlay(Circle().stroke(Color(white: 0.35), lineWidth: 1))
                 Capsule()
-                    .fill(Color.orange)
+                    .fill(Color.brandOrange)
                     .frame(width: 3, height: size * 0.32)
                     .offset(y: -size * 0.22)
                     .rotationEffect(.degrees(angleDegrees))

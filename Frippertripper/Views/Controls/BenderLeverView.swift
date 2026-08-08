@@ -28,9 +28,9 @@ struct BenderLeverView: View {
                         .position(x: geo.size.width / 2, y: geo.size.height / 2)
 
                     Circle()
-                        .fill(Color.orange)
+                        .fill(Color.brandOrange)
                         .overlay(Circle().stroke(Color(white: 0.95).opacity(0.6), lineWidth: 1.5))
-                        .shadow(color: .orange.opacity(0.5), radius: 4)
+                        .shadow(color: .brandOrange.opacity(0.5), radius: 4)
                         .frame(width: knobDiameter, height: knobDiameter)
                         .position(x: geo.size.width / 2, y: knobY)
                 }
