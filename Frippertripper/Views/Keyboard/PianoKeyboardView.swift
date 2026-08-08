@@ -45,6 +45,16 @@ struct PianoKeyboardView: View {
     private var whiteNotes: [PianoNote] { notes.filter { !$0.isSharp } }
     private var blackNotes: [PianoNote] { notes.filter { $0.isSharp } }
 
+    // Flat top (flush with the keyboard's upper edge and with neighboring keys),
+    // rounded bottom (the exposed edge) - matches the rounded-corner language used
+    // everywhere else in the app rather than the piano's sharp 90-degree rectangles.
+    private var whiteKeyShape: UnevenRoundedRectangle {
+        UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 6, bottomTrailingRadius: 6, topTrailingRadius: 0)
+    }
+    private var blackKeyShape: UnevenRoundedRectangle {
+        UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 4, bottomTrailingRadius: 4, topTrailingRadius: 0)
+    }
+
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1.0 / 30.0)) { _ in
             GeometryReader { geo in
@@ -55,15 +65,15 @@ struct PianoKeyboardView: View {
                 ZStack(alignment: .topLeading) {
                     HStack(spacing: 0) {
                         ForEach(whiteNotes) { note in
-                            Rectangle()
+                            whiteKeyShape
                                 .fill(whiteKeyColor(note: note, soundingId: soundingId))
-                                .overlay(Rectangle().stroke(Color.black.opacity(0.25), lineWidth: 0.5))
+                                .overlay(whiteKeyShape.stroke(Color.black.opacity(0.25), lineWidth: 0.5))
                         }
                     }
 
                     ForEach(blackNotes) { note in
                         let xOffset = blackKeyXOffset(for: note, whiteWidth: whiteWidth, blackWidth: blackWidth)
-                        Rectangle()
+                        blackKeyShape
                             .fill(blackKeyColor(note: note, soundingId: soundingId))
                             .frame(width: blackWidth, height: geo.size.height * 0.62)
                             .position(x: xOffset + blackWidth / 2, y: geo.size.height * 0.31)

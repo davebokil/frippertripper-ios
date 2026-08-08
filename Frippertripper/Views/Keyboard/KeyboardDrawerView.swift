@@ -22,8 +22,7 @@ struct KeyboardDrawerView: View {
                 .frame(width: 40, height: 5)
                 .padding(.top, 8)
 
-            octaveRow
-            keySizeRow
+            controlRow
 
             PianoKeyboardView(engine: engine, octaveOffset: octaveOffset, octaveSpan: octaveSpan, isHoldMode: isHoldMode)
                 .frame(height: 150)
@@ -45,14 +44,22 @@ struct KeyboardDrawerView: View {
         )
     }
 
-    private var octaveRow: some View {
-        HStack(spacing: 12) {
+    private var controlRow: some View {
+        HStack(spacing: 10) {
             stepper(
-                label: octaveLabel, minWidth: 64,
+                label: octaveLabel, minWidth: 58,
                 decrement: { octaveOffset = max(octaveOffset - 1, octaveRange.lowerBound) },
                 increment: { octaveOffset = min(octaveOffset + 1, octaveRange.upperBound) },
                 canDecrement: octaveOffset > octaveRange.lowerBound,
                 canIncrement: octaveOffset < octaveRange.upperBound
+            )
+
+            stepper(
+                label: "\(octaveSpan)", minWidth: 14,
+                decrement: { octaveSpan = max(octaveSpan - 1, spanRange.lowerBound) },
+                increment: { octaveSpan = min(octaveSpan + 1, spanRange.upperBound) },
+                canDecrement: octaveSpan > spanRange.lowerBound,
+                canIncrement: octaveSpan < spanRange.upperBound
             )
 
             Spacer()
@@ -64,35 +71,17 @@ struct KeyboardDrawerView: View {
         .padding(.horizontal, 16)
     }
 
-    private var keySizeRow: some View {
-        HStack(spacing: 12) {
-            Text("Key Size")
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(.secondary)
-
-            Spacer()
-
-            stepper(
-                label: "\(octaveSpan) oct", minWidth: 44,
-                decrement: { octaveSpan = max(octaveSpan - 1, spanRange.lowerBound) },
-                increment: { octaveSpan = min(octaveSpan + 1, spanRange.upperBound) },
-                canDecrement: octaveSpan > spanRange.lowerBound,
-                canIncrement: octaveSpan < spanRange.upperBound
-            )
-        }
-        .padding(.horizontal, 16)
-    }
-
     @ViewBuilder
     private func stepper(
         label: String, minWidth: CGFloat,
         decrement: @escaping () -> Void, increment: @escaping () -> Void,
         canDecrement: Bool, canIncrement: Bool
     ) -> some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 8) {
             Button(action: decrement) {
                 Image(systemName: "minus")
-                    .frame(width: 30, height: 30)
+                    .font(.system(size: 12, weight: .semibold))
+                    .frame(width: 26, height: 26)
                     .background(Color(white: 0.18))
                     .clipShape(Circle())
             }
@@ -104,7 +93,8 @@ struct KeyboardDrawerView: View {
 
             Button(action: increment) {
                 Image(systemName: "plus")
-                    .frame(width: 30, height: 30)
+                    .font(.system(size: 12, weight: .semibold))
+                    .frame(width: 26, height: 26)
                     .background(Color(white: 0.18))
                     .clipShape(Circle())
             }

@@ -14,7 +14,7 @@ struct ControllerPanelView: View {
                 )
                 ToggleSwitchView(label: "Porta", selection: $engine.portamentoOn, options: [false, true]) { $0 ? "On" : "Off" }
                 BenderLeverView(position: $engine.benderPosition)
-                    .frame(width: 44, height: 90)
+                    .frame(width: 50, height: 100)
             }
         }
     }

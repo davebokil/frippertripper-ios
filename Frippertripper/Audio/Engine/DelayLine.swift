@@ -25,22 +25,32 @@ final class DelayLine: @unchecked Sendable {
 
     /// Writes `input + feedbackGain * delayedRead` into the ring buffer and returns
     /// the delayed sample read `delayTimeSeconds` behind the write head.
+    ///
+    /// `delaySamples` and every index are clamped defensively against the *current*
+    /// `capacity`, not just derived from it - `prepare(sampleRate:)` can reallocate
+    /// `buffer` (e.g. on session restart) while a stale `writeIndex` or an in-flight
+    /// `delayTimeSeconds` briefly reflects the old size; a real crash (index out of
+    /// range here) was traced to exactly that race. Belt-and-suspenders even though
+    /// the actual trigger was fixed at the call site.
     func process(input: Float, delayTimeSeconds: Float, feedbackGain: Float) -> Float {
         let capacity = buffer.count
-        guard capacity > 0 else { return 0 }
+        guard capacity > 1 else { return 0 }
 
-        let delaySamples = Double(delayTimeSeconds) * sampleRate
-        let readPosition = Double(writeIndex) - delaySamples
+        let maxDelaySamples = Double(capacity - 2)
+        let delaySamples = min(max(Double(delayTimeSeconds) * sampleRate, 0), maxDelaySamples)
+        let safeWriteIndex = min(max(writeIndex, 0), capacity - 1)
+
+        let readPosition = Double(safeWriteIndex) - delaySamples
         var wrapped = readPosition.truncatingRemainder(dividingBy: Double(capacity))
         if wrapped < 0 { wrapped += Double(capacity) }
 
-        let index0 = Int(wrapped)
+        let index0 = min(max(Int(wrapped), 0), capacity - 1)
         let index1 = (index0 + 1) % capacity
         let frac = Float(wrapped - Double(index0))
         let delayed = buffer[index0] * (1 - frac) + buffer[index1] * frac
 
-        buffer[writeIndex] = input + feedbackGain * delayed
-        writeIndex = (writeIndex + 1) % capacity
+        buffer[safeWriteIndex] = input + feedbackGain * delayed
+        writeIndex = (safeWriteIndex + 1) % capacity
 
         return delayed
     }

@@ -19,6 +19,7 @@ struct ContentView: View {
             Color.black.ignoresSafeArea()
 
             VStack(spacing: 0) {
+                titleRow
                 topToolbar
                 FrontPanelPagerView(engine: engine, selectedPage: $selectedPage)
             }
@@ -54,18 +55,47 @@ struct ContentView: View {
             engine.audioEngineController.start()
         }
         .onChange(of: scenePhase) { _, newPhase in
-            if newPhase != .active {
+            // Specifically .background, not "!= .active" - presenting any .sheet
+            // (the FX/Presets/About panels) transiently flips scenePhase to
+            // .inactive, which is a normal, common side effect of modal presentation
+            // on iOS, not the app actually backgrounding. Stopping the engine there
+            // tore down and reallocated the delay buffer while the render thread
+            // could still be mid-flight against the old one - the actual root cause
+            // of a crash reported "after moving echo dials" (opening the FX sheet to
+            // reach them was what triggered the stop/reallocate race).
+            if newPhase == .background {
                 engine.audioEngineController.stop()
             }
         }
+    }
+
+    private var titleRow: some View {
+        HStack {
+            Button {
+                isAboutPresented = true
+            } label: {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text("FRIPPERTRIPPER")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(.white)
+                        .tracking(1.5)
+                    Text("SYNTH AND DELAY LOOPER")
+                        .font(.system(size: 9, weight: .regular))
+                        .foregroundStyle(.secondary)
+                        .tracking(0.8)
+                }
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 14)
+        .padding(.top, 8)
     }
 
     private var topToolbar: some View {
         HStack(spacing: 10) {
             PageSelectorView(selectedPage: $selectedPage)
             toolbarIconButton(systemName: "square.stack.3d.up") { isPresetsPresented = true }
-            toolbarIconButton(systemName: "waveform.path.ecg") { isFxPresented = true }
-            toolbarIconButton(systemName: "info.circle") { isAboutPresented = true }
+            toolbarIconButton(systemName: "dial.medium.fill") { isFxPresented = true }
         }
         .padding(.horizontal, 14)
         .padding(.top, 8)

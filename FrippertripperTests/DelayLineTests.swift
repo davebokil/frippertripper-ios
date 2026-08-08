@@ -67,4 +67,37 @@ final class DelayLineTests: XCTestCase {
         }
         XCTAssertLessThan(maxAbs, 20, "even near-max feedback (0.97, below unity) shouldn't blow up")
     }
+
+    /// Regression test for a crash reported via TestFlight ("crashed after moving
+    /// echo dials"): index-out-of-range in `process(...)` when `writeIndex` or the
+    /// requested delay time is momentarily inconsistent with the buffer's current
+    /// capacity (traced to `prepare()` reallocating the buffer via an over-eager
+    /// scenePhase handler stopping the engine on `.inactive`, not just `.background`,
+    /// while the render thread could still be mid-flight against the old buffer). The
+    /// actual trigger was fixed at the call site, but `process(...)` itself should
+    /// never crash regardless of what `writeIndex`/capacity look like when called.
+    func testNeverCrashesEvenAtMaxDelayAcrossManyCapacities() {
+        for sampleRate: Double in [8000, 22050, 44100, 48000, 96000] {
+            let delay = DelayLine()
+            delay.prepare(sampleRate: sampleRate)
+
+            for i in 0..<Int(sampleRate) {
+                let delayTime: Float = i % 2 == 0 ? 4.0 : 0.0 // sweep both extremes
+                let output = delay.process(input: 0.5, delayTimeSeconds: delayTime, feedbackGain: 0.9)
+                XCTAssertTrue(output.isFinite, "sampleRate \(sampleRate), sample \(i)")
+            }
+        }
+    }
+
+    func testDelayTimeBeyondMaxDoesNotCrash() {
+        let delay = DelayLine()
+        delay.prepare(sampleRate: sampleRate)
+
+        for _ in 0..<4410 {
+            // Beyond DelayLine.maxDelaySeconds - shouldn't be reachable via the UI
+            // (clamped to 0...4), but process(...) must stay safe regardless.
+            let output = delay.process(input: 0.5, delayTimeSeconds: 100, feedbackGain: 0.9)
+            XCTAssertTrue(output.isFinite)
+        }
+    }
 }

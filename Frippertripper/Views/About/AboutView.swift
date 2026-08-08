@@ -17,9 +17,13 @@ struct AboutView: View {
 
                 Spacer()
 
-                Text("made with ♥ by dave bokil")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                HStack(spacing: 4) {
+                    Text("made with ♥ by")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    Link("dave bokil", destination: URL(string: "https://davebokil.com/")!)
+                        .font(.footnote)
+                }
             }
             .padding(24)
             .frame(maxWidth: .infinity, alignment: .leading)

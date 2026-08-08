@@ -12,12 +12,22 @@ final class AVAudioSessionManager {
     private var interruptionObserver: NSObjectProtocol?
     private var routeChangeObserver: NSObjectProtocol?
 
+    /// Requested every activation, not just once - without an explicit preference,
+    /// the OS doesn't reliably re-grant the same sample rate it gave the first time.
+    /// A real bug traced to exactly this: backgrounding fully deactivates the session
+    /// (correctly), and reactivating on return-to-foreground without a stated
+    /// preference could get handed back a lower rate, rendering the synth at reduced
+    /// audio bandwidth - audibly duller/"compressed"-sounding, without any error or
+    /// crash to signal it.
+    static let preferredSampleRate: Double = 48000
+
     var sampleRate: Double {
-        session.sampleRate > 0 ? session.sampleRate : 44100
+        session.sampleRate > 0 ? session.sampleRate : Self.preferredSampleRate
     }
 
     func activate() throws {
         try session.setCategory(.playback, mode: .default, options: [])
+        try session.setPreferredSampleRate(Self.preferredSampleRate)
         try session.setActive(true, options: [])
     }
 

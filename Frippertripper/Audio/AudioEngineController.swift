@@ -30,6 +30,13 @@ final class AudioEngineController: ObservableObject {
             return
         }
 
+        // Defensive: a stale node from a previous start()/stop() cycle should
+        // already be gone via stop(), but detaching here too avoids ever leaving two
+        // source nodes (both backed by the same `core`) attached to the graph at once.
+        if let staleNode = sourceNode {
+            engine.detach(staleNode)
+        }
+
         let node = AVAudioSourceNode(format: format, renderBlock: Self.makeRenderBlock(core: core))
 
         engine.attach(node)
@@ -62,6 +69,10 @@ final class AudioEngineController: ObservableObject {
         guard isRunning else { return }
         sessionManager.stopObserving()
         engine.stop()
+        if let node = sourceNode {
+            engine.detach(node)
+            sourceNode = nil
+        }
         sessionManager.deactivate()
         isRunning = false
     }
