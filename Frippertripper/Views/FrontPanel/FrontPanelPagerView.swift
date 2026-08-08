@@ -50,4 +50,4 @@ struct FrontPanelPagerView: View {
 }
 
 /// Titles for the front panel's 3 pages, shared with the tappable page selector.
-let frontPanelPageTitles = ["VCO / Filter", "Envelope / LFO", "Arp / Controller"]
+let frontPanelPageTitles = ["VCO / Filter", "Env / LFO", "Arp / Cntrl"]

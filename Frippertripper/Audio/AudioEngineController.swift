@@ -39,9 +39,17 @@ final class AudioEngineController: ObservableObject {
         do {
             try engine.start()
             isRunning = true
+            // `startObserving`'s closures are `@Sendable`/nonisolated at the type
+            // level (see its doc comment), but `queue: .main` guarantees they only
+            // ever actually run on the main actor - `assumeIsolated` asserts that
+            // known-but-unproven fact rather than doing an unnecessary async hop.
             sessionManager.startObserving(
-                onInterruptionBegan: { [weak self] in self?.handleInterruptionBegan() },
-                onInterruptionEnded: { [weak self] shouldResume in self?.handleInterruptionEnded(shouldResume: shouldResume) }
+                onInterruptionBegan: { [weak self] in
+                    MainActor.assumeIsolated { self?.handleInterruptionBegan() }
+                },
+                onInterruptionEnded: { [weak self] shouldResume in
+                    MainActor.assumeIsolated { self?.handleInterruptionEnded(shouldResume: shouldResume) }
+                }
             )
         } catch {
             print("AudioEngineController: failed to start engine: \(error)")

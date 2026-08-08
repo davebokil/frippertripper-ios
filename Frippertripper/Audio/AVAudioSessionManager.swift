@@ -25,8 +25,14 @@ final class AVAudioSessionManager {
         try? session.setActive(false, options: .notifyOthersOnDeactivation)
     }
 
-    /// Handlers are invoked on the main thread (`queue: .main`).
-    func startObserving(onInterruptionBegan: @escaping () -> Void, onInterruptionEnded: @escaping (_ shouldResume: Bool) -> Void) {
+    /// Handlers are invoked on the main thread (`queue: .main`). Marked `@Sendable`
+    /// since `NotificationCenter`'s observer closure is itself `@Sendable` under
+    /// Swift 6 strict concurrency - `queue: .main` guarantees the actual call site is
+    /// safe, but the type system needs the parameter types to say so too.
+    func startObserving(
+        onInterruptionBegan: @escaping @Sendable () -> Void,
+        onInterruptionEnded: @escaping @Sendable (_ shouldResume: Bool) -> Void
+    ) {
         let center = NotificationCenter.default
 
         interruptionObserver = center.addObserver(
