@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Save/load sheet for the global preset library: a preset captures every synth,
 /// echo, and limiter parameter as one snapshot (per the user's request), not
@@ -12,6 +13,11 @@ struct PresetsView: View {
     @State private var newPresetName = ""
     @State private var renamingPreset: SynthPreset?
     @State private var renameText = ""
+
+    // TEMPORARY dev tool - see PresetCodeExporter.swift for removal notes.
+    @State private var isCopyingPresetCode = false
+    @State private var copyPresetCodeName = ""
+    @State private var didCopyPresetCode = false
 
     var body: some View {
         NavigationStack {
@@ -59,6 +65,15 @@ struct PresetsView: View {
             .navigationTitle("Presets")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // TEMPORARY dev tool - see PresetCodeExporter.swift for removal notes.
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        copyPresetCodeName = ""
+                        isCopyingPresetCode = true
+                    } label: {
+                        Image(systemName: "doc.on.doc")
+                    }
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
                         newPresetName = ""
@@ -91,6 +106,23 @@ struct PresetsView: View {
                         presetStore.rename(preset, to: renameText)
                     }
                 }
+            }
+            // TEMPORARY dev tool - see PresetCodeExporter.swift for removal notes.
+            .alert("Copy Current Settings as Code", isPresented: $isCopyingPresetCode) {
+                TextField("Preset name", text: $copyPresetCodeName)
+                Button("Cancel", role: .cancel) {}
+                Button("Copy") {
+                    let name = copyPresetCodeName.trimmingCharacters(in: .whitespacesAndNewlines)
+                    guard !name.isEmpty else { return }
+                    let preset = engine.makePreset(name: name)
+                    UIPasteboard.general.string = PresetCodeExporter.swiftCode(for: preset)
+                    didCopyPresetCode = true
+                }
+            }
+            .alert("Copied", isPresented: $didCopyPresetCode) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Paste it into chat to add as a factory preset.")
             }
         }
         .presentationDetents([.medium, .large])
