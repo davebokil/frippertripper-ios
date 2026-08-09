@@ -11,7 +11,6 @@ struct ContentView: View {
     @State private var isKeyboardOpen = false
     @State private var isFxPresented = false
     @State private var isPresetsPresented = false
-    @State private var isAboutPresented = false
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -47,16 +46,13 @@ struct ContentView: View {
         .sheet(isPresented: $isPresetsPresented) {
             PresetsView(engine: engine, presetStore: presetStore)
         }
-        .sheet(isPresented: $isAboutPresented) {
-            AboutView()
-        }
         .preferredColorScheme(.dark)
         .onAppear {
             engine.audioEngineController.start()
         }
         .onChange(of: scenePhase) { _, newPhase in
             // Specifically .background, not "!= .active" - presenting any .sheet
-            // (the FX/Presets/About panels) transiently flips scenePhase to
+            // (the FX/Presets panels) transiently flips scenePhase to
             // .inactive, which is a normal, common side effect of modal presentation
             // on iOS, not the app actually backgrounding. Stopping the engine there
             // tore down and reallocated the delay buffer while the render thread
@@ -71,19 +67,15 @@ struct ContentView: View {
 
     private var titleRow: some View {
         HStack {
-            Button {
-                isAboutPresented = true
-            } label: {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text("FRIPPERTRIPPER")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(.white)
-                        .tracking(1.5)
-                    Text("SYNTH AND DELAY LOOPER")
-                        .font(.system(size: 9, weight: .regular))
-                        .foregroundStyle(.secondary)
-                        .tracking(0.8)
-                }
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text("FRIPPERTRIPPER")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(.white)
+                    .tracking(1.5)
+                Text("SYNTH AND DELAY LOOPER")
+                    .font(.system(size: 9, weight: .regular))
+                    .foregroundStyle(.secondary)
+                    .tracking(0.8)
             }
             Spacer()
         }
