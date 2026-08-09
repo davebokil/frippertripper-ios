@@ -132,5 +132,9 @@ extension SynthEngine {
 
         limiterThreshold = preset.limiterThreshold
         limiterCeiling = preset.limiterCeiling
+
+        // A ringing echo tail from whatever was playing before shouldn't bleed
+        // into the newly-loaded sound.
+        core.clearEcho()
     }
 }

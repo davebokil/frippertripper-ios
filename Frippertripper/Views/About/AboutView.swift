@@ -11,7 +11,7 @@ struct AboutView: View {
                     .foregroundStyle(.secondary)
                     .tracking(1.2)
 
-                Text("Frippertripper is synthesizer and tape-echo delay/looper inspired by Frippertronics.")
+                Text("Frippertripper is a synthesizer and tape-echo delay/looper inspired by Frippertronics.")
                     .font(.body)
                     .foregroundStyle(.primary)
 

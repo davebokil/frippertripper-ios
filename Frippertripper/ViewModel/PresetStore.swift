@@ -45,12 +45,12 @@ final class PresetStore {
     }
 
     private func load() {
-        guard let data = UserDefaults.standard.data(forKey: defaultsKey) else {
+        guard let data = UserDefaults.standard.data(forKey: defaultsKey),
+              let decoded = try? JSONDecoder().decode([SynthPreset].self, from: data) else {
             presets = FactoryPresets.all
             persist()
             return
         }
-        guard let decoded = try? JSONDecoder().decode([SynthPreset].self, from: data) else { return }
         presets = decoded
     }
 }
