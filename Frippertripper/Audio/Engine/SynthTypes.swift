@@ -34,5 +34,5 @@ enum LfoWaveform: String, Codable, Equatable {
 }
 
 enum ArpMode: String, Codable, Equatable {
-    case off, down, updown, up
+    case off, down, updown, up, random
 }

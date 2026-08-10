@@ -30,10 +30,10 @@ struct FrontPanelPagerView: View {
             page {
                 ArpPanelView(engine: engine)
                 ControllerPanelView(engine: engine)
-                PanelSection(title: "Patch") {
+                PanelSection(title: "Patch Browser") {
                     HStack(spacing: 12) {
                         PanelButtonView(label: "Init") { engine.resetToFactoryDefaults() }
-                        PanelButtonView(label: "Select", action: onPatchSelect)
+                        PanelButtonView(label: "Preset", action: onPatchSelect)
                         PanelButtonView(label: "Random") { engine.randomizeAll() }
                     }
                 }

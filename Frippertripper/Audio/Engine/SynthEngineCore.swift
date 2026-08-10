@@ -371,8 +371,13 @@ final class SynthEngineCore: @unchecked Sendable {
             arpClockRunning = false
             return
         }
-        arpStepIndex = (arpStepIndex + 1) % sequence.count
-        let step = sequence[arpStepIndex]
+        let step: (id: Int, freq: Float)
+        if arpMode == .random {
+            step = sequence.randomElement()!
+        } else {
+            arpStepIndex = (arpStepIndex + 1) % sequence.count
+            step = sequence[arpStepIndex]
+        }
         attack(freq: step.freq)
         currentNoteId = step.id
         arpVoiceSounding = true
@@ -406,7 +411,7 @@ final class SynthEngineCore: @unchecked Sendable {
         case .updown:
             guard withOctaves.count > 1 else { return withOctaves }
             return withOctaves + withOctaves[1..<(withOctaves.count - 1)].reversed()
-        case .up, .off:
+        case .up, .off, .random:
             return withOctaves
         }
     }
