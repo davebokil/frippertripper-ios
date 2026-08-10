@@ -20,7 +20,7 @@ struct ContentView: View {
             VStack(spacing: 0) {
                 titleRow
                 topToolbar
-                FrontPanelPagerView(engine: engine, selectedPage: $selectedPage)
+                FrontPanelPagerView(engine: engine, selectedPage: $selectedPage, onPatchSelect: { isPresetsPresented = true })
             }
 
             if !isKeyboardOpen {
@@ -48,6 +48,7 @@ struct ContentView: View {
         }
         .preferredColorScheme(.dark)
         .onAppear {
+            engine.restoreLastSession()
             engine.audioEngineController.start()
         }
         .onChange(of: scenePhase) { _, newPhase in
@@ -58,8 +59,12 @@ struct ContentView: View {
             // tore down and reallocated the delay buffer while the render thread
             // could still be mid-flight against the old one - the actual root cause
             // of a crash reported "after moving echo dials" (opening the FX sheet to
-            // reach them was what triggered the stop/reallocate race).
+            // reach them was what triggered the stop/reallocate race). Saving the
+            // session here too, for the same reason: it's the reliable "app is about
+            // to be suspended/killed" signal, without writing to UserDefaults on
+            // every knob tweak.
             if newPhase == .background {
+                engine.saveSession()
                 engine.audioEngineController.stop()
             }
         }
@@ -86,8 +91,8 @@ struct ContentView: View {
     private var topToolbar: some View {
         HStack(spacing: 10) {
             PageSelectorView(selectedPage: $selectedPage)
-            toolbarIconButton(systemName: "square.stack.3d.up") { isPresetsPresented = true }
             toolbarIconButton(systemName: "dial.medium.fill") { isFxPresented = true }
+            toolbarIconButton(systemName: "square.stack.3d.up") { isPresetsPresented = true }
         }
         .padding(.horizontal, 14)
         .padding(.top, 8)

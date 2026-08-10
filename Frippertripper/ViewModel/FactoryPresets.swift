@@ -9,7 +9,7 @@ import Foundation
 enum FactoryPresets {
     private static let referenceDate = Date(timeIntervalSince1970: 1_700_000_000)
 
-    static let all: [SynthPreset] = [looper, seaSirenCall, starryRoad, seaWreckage, lingering, voyager]
+    static let all: [SynthPreset] = [looper, seaSirenCall, starryRoad, seaWreckage, lingering, voyager, hedgeLead, wobbleBass, concreteHallway]
 
     static let looper = SynthPreset(
         id: UUID(uuidString: "FD6C8C1F-9601-4718-9833-81F0742DD94E")!,
@@ -99,5 +99,50 @@ enum FactoryPresets {
         benderVcoSens: 0.3078, benderVcfSens: 0.1779, portamentoTime: 3.4664, portamentoOn: false,
         echoVolume: 0.4362, echoTime: 2.4236, echoRepeat: 0.8147,
         limiterThreshold: -3, limiterCeiling: 0
+    )
+
+    static let hedgeLead = SynthPreset(
+        id: UUID(uuidString: "74692929-578E-4055-8B43-85AE065D5F99")!,
+        name: "Hedge Lead", createdAt: referenceDate,
+        vcoRange: .eight, vcoTune: 8.8894, vcoPulseWidth: 0.9315, vcoPwmSource: .manual,
+        mixSawLevel: 0.7682, mixPulseLevel: 0.7953, mixSubLevel: 0.5558, mixNoiseLevel: 0.2827, mixSubMode: .minus2Square,
+        filterCutoff: 177.7805, filterResonance: 0.3362, filterEnvAmount: 0.6939, filterLfoOn: false, filterKeyFollow: 0.3259,
+        attack: 0.004, decay: 0.8574, sustain: 0.6414, release: 2.5405,
+        vcaMode: .env,
+        lfoWaveform: .triangle, lfoRate: 3.8581, lfoDepth: 0.0298, lfoToPitchOn: true,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 3.6994, benderVcfSens: 3.1701, portamentoTime: 0.4227, portamentoOn: false,
+        echoVolume: 0.1374, echoTime: 0.3824, echoRepeat: 0.276,
+        limiterThreshold: -3, limiterCeiling: 0
+    )
+
+    static let wobbleBass = SynthPreset(
+        id: UUID(uuidString: "E8309478-0A34-4351-9D60-C86569B885F3")!,
+        name: "Wobble Bass", createdAt: referenceDate,
+        vcoRange: .sixteen, vcoTune: -0.1111, vcoPulseWidth: 0.5, vcoPwmSource: .manual,
+        mixSawLevel: 0.0816, mixPulseLevel: 0.4113, mixSubLevel: 0.4823, mixNoiseLevel: 0.1312, mixSubMode: .minus2Square,
+        filterCutoff: 1393.3752, filterResonance: 0.3411, filterEnvAmount: -0.2667, filterLfoOn: true, filterKeyFollow: 1,
+        attack: 0.0038, decay: 0.15, sustain: 0.7067, release: 0.8992,
+        vcaMode: .env,
+        lfoWaveform: .triangle, lfoRate: 5, lfoDepth: 0.26, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 2, benderVcfSens: 0, portamentoTime: 0.15, portamentoOn: false,
+        echoVolume: 0.1374, echoTime: 0.3732, echoRepeat: 0.3796,
+        limiterThreshold: -3, limiterCeiling: 0
+    )
+
+    static let concreteHallway = SynthPreset(
+        id: UUID(uuidString: "071BE8A8-783E-494B-AA49-D73FE97989F5")!,
+        name: "Concrete hallway", createdAt: referenceDate,
+        vcoRange: .eight, vcoTune: 8.7731, vcoPulseWidth: 0.363, vcoPwmSource: .env,
+        mixSawLevel: 0, mixPulseLevel: 0, mixSubLevel: 0, mixNoiseLevel: 0.7163, mixSubMode: .minus2Pulse,
+        filterCutoff: 64.9788, filterResonance: 0.8368, filterEnvAmount: 0.58, filterLfoOn: true, filterKeyFollow: 0.9264,
+        attack: 0.0054, decay: 3, sustain: 0.8483, release: 0.0985,
+        vcaMode: .gate,
+        lfoWaveform: .sh, lfoRate: 1.8454, lfoDepth: 0.4192, lfoToPitchOn: true,
+        arpMode: .up, arpOctaves: 1, arpHold: true, arpRate: 6.5166,
+        benderVcoSens: 6.4667, benderVcfSens: 0.8567, portamentoTime: 0.0228, portamentoOn: false,
+        echoVolume: 0.8685, echoTime: 0.4216, echoRepeat: 0.7137,
+        limiterThreshold: -11.4229, limiterCeiling: 0
     )
 }

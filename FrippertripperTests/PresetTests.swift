@@ -52,6 +52,33 @@ final class PresetTests: XCTestCase {
         XCTAssertEqual(decoded, original)
     }
 
+    func testSessionSaveAndRestoreRoundTripsEngineState() throws {
+        let suiteName = "PresetTests.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        // SynthEngine.saveSession()/restoreLastSession() always read/write
+        // UserDefaults.standard, so verify the round-trip contract they rely on
+        // against an isolated suite rather than polluting .standard from the test run.
+        let source = SynthEngine()
+        source.vcoRange = .four
+        source.filterCutoff = 2200
+        source.echoRepeat = 0.6
+        let snapshot = source.makePreset(name: "")
+        let data = try JSONEncoder().encode(snapshot)
+        defaults.set(data, forKey: "lastSession")
+
+        let reloadedData = try XCTUnwrap(defaults.data(forKey: "lastSession"))
+        let reloaded = try JSONDecoder().decode(SynthPreset.self, from: reloadedData)
+
+        let target = SynthEngine()
+        target.apply(reloaded)
+
+        XCTAssertEqual(target.vcoRange, .four)
+        XCTAssertEqual(target.filterCutoff, 2200)
+        XCTAssertEqual(target.echoRepeat, 0.6)
+    }
+
     func testStoreSaveRenameDeleteAndPersistAcrossInstances() throws {
         let suiteName = "PresetTests.\(UUID().uuidString)"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))

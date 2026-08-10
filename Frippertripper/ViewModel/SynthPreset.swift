@@ -64,6 +64,24 @@ struct SynthPreset: Identifiable, Codable, Equatable {
     // Limiter
     var limiterThreshold: Float
     var limiterCeiling: Float
+
+    /// Mirrors the default values declared on `SynthEngine`'s own properties -
+    /// what a freshly-created engine starts with. Used by "Init" to restore those
+    /// values through the same `apply(_:)` path a saved preset uses, rather than a
+    /// separate hand-rolled reset function.
+    static let factoryDefault = SynthPreset(
+        id: UUID(), name: "Default", createdAt: Date(),
+        vcoRange: .eight, vcoTune: 0, vcoPulseWidth: 0.5, vcoPwmSource: .manual,
+        mixSawLevel: 0.45, mixPulseLevel: 0.45, mixSubLevel: 0.4, mixNoiseLevel: 0, mixSubMode: .minus1Square,
+        filterCutoff: 3500, filterResonance: 0.3, filterEnvAmount: 0, filterLfoOn: false, filterKeyFollow: 0,
+        attack: 0.02, decay: 0.15, sustain: 0.7, release: 0.3,
+        vcaMode: .env,
+        lfoWaveform: .triangle, lfoRate: 5, lfoDepth: 0, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 2, benderVcfSens: 0, portamentoTime: 0.15, portamentoOn: false,
+        echoVolume: 0.3, echoTime: 0.35, echoRepeat: 0.4,
+        limiterThreshold: -3, limiterCeiling: 0
+    )
 }
 
 extension SynthEngine {

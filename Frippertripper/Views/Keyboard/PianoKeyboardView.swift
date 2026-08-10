@@ -39,8 +39,12 @@ struct PianoKeyboardView: View {
 
     private var notes: [PianoNote] {
         let span = max(octaveSpan, 1)
-        let low = max(0, min(60 + octaveOffset * 12, 127 - span * 12))
+        let low = lowMidi(offset: octaveOffset, span: octaveSpan)
         return makePianoNoteRange(lowMidi: low, highMidi: low + span * 12)
+    }
+
+    private func lowMidi(offset: Int, span: Int) -> Int {
+        max(0, min(60 + offset * 12, 127 - max(span, 1) * 12))
     }
     private var whiteNotes: [PianoNote] { notes.filter { !$0.isSharp } }
     private var blackNotes: [PianoNote] { notes.filter { $0.isSharp } }
@@ -120,8 +124,12 @@ struct PianoKeyboardView: View {
                 latchedNoteIds.removeAll()
             }
         }
-        .onChange(of: octaveOffset) { _, _ in resetHeldNotes() }
-        .onChange(of: octaveSpan) { _, _ in resetHeldNotes() }
+        .onChange(of: octaveOffset) { old, new in
+            transposeHeldNotes(by: lowMidi(offset: new, span: octaveSpan) - lowMidi(offset: old, span: octaveSpan))
+        }
+        .onChange(of: octaveSpan) { old, new in
+            transposeHeldNotes(by: lowMidi(offset: octaveOffset, span: new) - lowMidi(offset: octaveOffset, span: old))
+        }
     }
 
     private func resetHeldNotes() {
@@ -129,6 +137,29 @@ struct PianoKeyboardView: View {
         latchedNoteIds.removeAll()
         if let id = dragNoteId { engine.noteOff(id: id) }
         dragNoteId = nil
+    }
+
+    /// Keeps latched/held notes sounding (at their shifted pitch) across an octave or
+    /// span change instead of dropping them - `notes`' visible MIDI range shifts by
+    /// `delta`, so remapping ids by the same delta keeps them pointing at the same keys.
+    private func transposeHeldNotes(by delta: Int) {
+        guard delta != 0 else { return }
+
+        var transposed: Set<Int> = []
+        for id in latchedNoteIds {
+            engine.noteOff(id: id)
+            let newId = id + delta
+            engine.noteOn(id: newId, frequency: midiToFrequency(newId))
+            transposed.insert(newId)
+        }
+        latchedNoteIds = transposed
+
+        if let id = dragNoteId {
+            engine.noteOff(id: id)
+            let newId = id + delta
+            engine.noteOn(id: newId, frequency: midiToFrequency(newId))
+            dragNoteId = newId
+        }
     }
 
     private func whiteKeyColor(note: PianoNote, soundingId: Int) -> Color {

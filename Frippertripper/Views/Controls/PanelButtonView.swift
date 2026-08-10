@@ -11,6 +11,7 @@ struct PanelButtonView: View {
         Button(action: action) {
             Text(label)
                 .font(.system(size: 11, weight: .semibold))
+                .padding(.horizontal, 12)
                 .frame(minWidth: 64, minHeight: 36)
                 .background(isOn ? Color.brandOrange.opacity(0.75) : Color(white: 0.16))
                 .foregroundStyle(.white)

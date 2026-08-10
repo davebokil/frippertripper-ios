@@ -14,7 +14,7 @@ struct ArpPanelView: View {
                     case .updown: "Up/Dn"
                     }
                 }
-                KnobView(label: "Rate", value: $engine.arpRate, range: 0.1...20, scale: .logarithmic, formatter: { String(format: "%.1f", $0) })
+                KnobView(label: "Rate", value: $engine.arpRate, range: 0.1...20, scale: .logarithmic, formatter: { String(format: "%.1fHz", $0) })
                 ToggleSwitchView(label: "Octaves", selection: $engine.arpOctaves, options: [1, 2, 3]) { "\($0)" }
                 PanelButtonView(label: "Hold", isOn: engine.arpHold) { engine.arpHold.toggle() }
             }

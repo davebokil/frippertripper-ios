@@ -11,6 +11,7 @@ import SwiftUI
 struct FrontPanelPagerView: View {
     @Bindable var engine: SynthEngine
     @Binding var selectedPage: Int
+    var onPatchSelect: () -> Void
 
     var body: some View {
         TabView(selection: $selectedPage) {
@@ -29,7 +30,13 @@ struct FrontPanelPagerView: View {
             page {
                 ArpPanelView(engine: engine)
                 ControllerPanelView(engine: engine)
-                PanelButtonView(label: "Random") { engine.randomizeAll() }
+                PanelSection(title: "Patch") {
+                    HStack(spacing: 12) {
+                        PanelButtonView(label: "Init") { engine.resetToFactoryDefaults() }
+                        PanelButtonView(label: "Select", action: onPatchSelect)
+                        PanelButtonView(label: "Random") { engine.randomizeAll() }
+                    }
+                }
             }
             .tag(2)
         }

@@ -132,6 +132,38 @@ final class SynthEngine {
         portamentoOn = Bool.random(probabilityTrue: 0.3)
     }
 
+    // MARK: - Reset
+
+    /// Restores every persistent parameter to its factory-default value, via the
+    /// same `apply(_:)` path a saved preset uses.
+    func resetToFactoryDefaults() {
+        apply(.factoryDefault)
+    }
+
+    // MARK: - Session persistence
+
+    /// Snapshots every persistent parameter (the same set `SynthPreset` models -
+    /// front panel, echo, limiter; not bender position or UI/keyboard state) so the
+    /// next launch can pick up where this session left off, regardless of whether
+    /// the sound started from a saved preset or was hand-tweaked. Call on
+    /// backgrounding, not on every parameter change - one write per session is
+    /// enough and avoids hammering `UserDefaults` while a knob is being dragged.
+    func saveSession() {
+        guard let data = try? JSONEncoder().encode(makePreset(name: "")) else { return }
+        UserDefaults.standard.set(data, forKey: Self.lastSessionKey)
+    }
+
+    /// Restores the last-saved session snapshot, if any (none exists on a fresh
+    /// install, in which case this leaves the engine at its declared defaults).
+    /// Call once at launch, before starting the audio engine.
+    func restoreLastSession() {
+        guard let data = UserDefaults.standard.data(forKey: Self.lastSessionKey),
+              let preset = try? JSONDecoder().decode(SynthPreset.self, from: data) else { return }
+        apply(preset)
+    }
+
+    private static let lastSessionKey = "com.davebokil.frippertripper.lastSession"
+
     private func randLog(_ min: Float, _ max: Float) -> Float {
         let lo = log(min), hi = log(max)
         return exp(lo + Float.random(in: 0...1) * (hi - lo))
