@@ -73,11 +73,11 @@ struct ContentView: View {
     private var titleRow: some View {
         HStack {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text("FRIPPERTRIPPER")
+                Text("AURAMIN")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundStyle(.white)
                     .tracking(1.5)
-                Text("SYNTH AND ECHO MACHINE")
+                Text("A SYNTH AND ECHO MACHINE")
                     .font(.system(size: 9, weight: .regular))
                     .foregroundStyle(.secondary)
                     .tracking(0.8)

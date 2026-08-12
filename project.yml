@@ -31,7 +31,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.davebokil.frippertripper
         PRODUCT_NAME: Frippertripper
-        INFOPLIST_KEY_CFBundleDisplayName: Frippertripper
+        INFOPLIST_KEY_CFBundleDisplayName: Auramin
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.music
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: A8BS37XPJB
