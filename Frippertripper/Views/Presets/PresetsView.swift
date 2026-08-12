@@ -65,15 +65,6 @@ struct PresetsView: View {
             .navigationTitle("Presets")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                // TEMPORARY dev tool - see PresetCodeExporter.swift for removal notes.
-                ToolbarItem(placement: .confirmationAction) {
-                    Button {
-                        copyPresetCodeName = ""
-                        isCopyingPresetCode = true
-                    } label: {
-                        Image(systemName: "doc.on.doc")
-                    }
-                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
                         newPresetName = ""

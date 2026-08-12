@@ -16,17 +16,10 @@ struct EchoControlsView: View {
                         .frame(minWidth: 24, alignment: .leading)
                 }
                 KnobView(label: "Time", value: $engine.echoTime, range: 0...4, formatter: { String(format: "%.2fs", $0) })
-                VStack {
-                    SliderView(label: "Volume", value: $engine.echoVolume, range: 0...1, orientation: .horizontal)
-                        .frame(height: 26)
-                    Spacer()
-                }
-                .frame(height: 120)
-                VStack {
-                    PanelButtonView(label: "Clear") { engine.clearEcho() }
-                    Spacer()
-                }
-                .frame(height: 120)
+                SliderView(label: "Volume", value: $engine.echoVolume, range: 0...1)
+                    .frame(height: 120)
+                PanelButtonView(label: "Clear") { engine.clearEcho() }
+                    .frame(height: 120)
             }
         }
     }

@@ -10,9 +10,13 @@ enum FactoryPresets {
     private static let referenceDate = Date(timeIntervalSince1970: 1_700_000_000)
 
     static let all: [SynthPreset] = [
-        seaSirenCall, starryRoad, seaWreckage, lingering, voyager, hedgeLead, wobbleBass, concreteHallway,
+        driftPad, voyager, hedgeLead, seaWreckage, lingering, wobbleBass, concreteHallway,
         nightFerry, tidalDrone, undertow, saltFlats, copperWireLead, tarPitBass, glassBell, rustBloom,
-        quarryEcho, paperMoth, halogenBuzz, driftPad,
+        quarryEcho, paperMoth, halogenBuzz, seaSirenCall, starryRoad,
+        amberGlassPad, ironGateDrone, winterStatic, mothWingFlutter, harborFog, brokenCompass, chromeVapor, slowTide,
+        ashField, neonHallway, frostBloom, distantSignal, copperRain, sunkenBell, gravelRoad, staticBloom,
+        lastTram, paleHorizon, wireFence, kelpForest, fadedPolaroid, steelDrizzle, lowTideBass, paperLantern,
+        marshLight, dieselHum, velvetFog, boneDust, wanderingStar, crackedMirror,
     ]
 
     static let seaSirenCall = SynthPreset(
@@ -76,17 +80,17 @@ enum FactoryPresets {
     )
 
     static let voyager = SynthPreset(
-        id: UUID(uuidString: "D50BB092-8864-4DFB-895C-2AECD1C95092")!,
+        id: UUID(uuidString: "C0283FC7-B59C-464D-BD18-0BA34925F56F")!,
         name: "Voyager", createdAt: referenceDate,
         vcoRange: .eight, vcoTune: 3.7901, vcoPulseWidth: 0.9013, vcoPwmSource: .manual,
         mixSawLevel: 0.7441, mixPulseLevel: 0.5732, mixSubLevel: 0.1792, mixNoiseLevel: 0.202, mixSubMode: .minus2Pulse,
-        filterCutoff: 614.9666, filterResonance: 0.0593, filterEnvAmount: 0.6072, filterLfoOn: false, filterKeyFollow: 0.0603,
-        attack: 0.5374, decay: 0.7146, sustain: 0.8524, release: 1.0608,
-        vcaMode: .gate,
+        filterCutoff: 156.8622, filterResonance: 0.0593, filterEnvAmount: 0.8067, filterLfoOn: false, filterKeyFollow: 0.0603,
+        attack: 0.2996, decay: 0.1853, sustain: 0.7622, release: 2.8338,
+        vcaMode: .env,
         lfoWaveform: .triangle, lfoRate: 3.006, lfoDepth: 0.0308, lfoToPitchOn: false,
         arpMode: .off, arpOctaves: 3, arpHold: false, arpRate: 14.1744,
         benderVcoSens: 0.3078, benderVcfSens: 0.1779, portamentoTime: 3.4664, portamentoOn: false,
-        echoVolume: 0.4362, echoTime: 2.4236, echoRepeat: 0.8147,
+        echoVolume: 0.6077, echoTime: 2.6569, echoRepeat: 0.6978,
         limiterThreshold: -3, limiterCeiling: 0
     )
 
@@ -313,5 +317,455 @@ enum FactoryPresets {
         benderVcoSens: 2, benderVcfSens: 0.5, portamentoTime: 0.9, portamentoOn: true,
         echoVolume: 0.45, echoTime: 1.2, echoRepeat: 0.5,
         limiterThreshold: -4, limiterCeiling: 0
+    )
+
+    static let amberGlassPad = SynthPreset(
+        id: UUID(uuidString: "159195BD-40AF-422A-8E8A-EAE73DCE5B4C")!,
+        name: "Amber Glass Pad", createdAt: referenceDate,
+        vcoRange: .eight, vcoTune: 0.4, vcoPulseWidth: 0.5, vcoPwmSource: .lfo,
+        mixSawLevel: 0.55, mixPulseLevel: 0.5, mixSubLevel: 0.3, mixNoiseLevel: 0.05, mixSubMode: .minus1Square,
+        filterCutoff: 2100, filterResonance: 0.25, filterEnvAmount: 0.2, filterLfoOn: true, filterKeyFollow: 0.4,
+        attack: 1.6, decay: 1.2, sustain: 0.85, release: 2.4,
+        vcaMode: .env,
+        lfoWaveform: .triangle, lfoRate: 0.3, lfoDepth: 0.35, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 2, benderVcfSens: 0.5, portamentoTime: 0.8, portamentoOn: true,
+        echoVolume: 0.4, echoTime: 1.4, echoRepeat: 0.45,
+        limiterThreshold: -4, limiterCeiling: 0
+    )
+
+    static let ironGateDrone = SynthPreset(
+        id: UUID(uuidString: "F7820FD2-B285-4FB7-82D0-6389D611E46E")!,
+        name: "Iron Gate Drone", createdAt: referenceDate,
+        vcoRange: .sixteen, vcoTune: -0.6, vcoPulseWidth: 0.5, vcoPwmSource: .manual,
+        mixSawLevel: 0.4, mixPulseLevel: 0.35, mixSubLevel: 0.9, mixNoiseLevel: 0.1, mixSubMode: .minus1Square,
+        filterCutoff: 140, filterResonance: 0.35, filterEnvAmount: 0.1, filterLfoOn: true, filterKeyFollow: 0.1,
+        attack: 3.5, decay: 1.5, sustain: 0.95, release: 4.5,
+        vcaMode: .gate,
+        lfoWaveform: .triangle, lfoRate: 0.12, lfoDepth: 0.4, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 1, benderVcfSens: 0.3, portamentoTime: 2.2, portamentoOn: true,
+        echoVolume: 0.5, echoTime: 3.2, echoRepeat: 0.7,
+        limiterThreshold: -5, limiterCeiling: 0
+    )
+
+    static let winterStatic = SynthPreset(
+        id: UUID(uuidString: "55DB1E16-9CA2-4B05-AFE8-7A112592647D")!,
+        name: "Winter Static", createdAt: referenceDate,
+        vcoRange: .four, vcoTune: 2.1, vcoPulseWidth: 0.5, vcoPwmSource: .manual,
+        mixSawLevel: 0.1, mixPulseLevel: 0.05, mixSubLevel: 0.15, mixNoiseLevel: 0.9, mixSubMode: .minus2Pulse,
+        filterCutoff: 3800, filterResonance: 0.4, filterEnvAmount: 0.3, filterLfoOn: true, filterKeyFollow: 0.2,
+        attack: 0.8, decay: 0.6, sustain: 0.3, release: 1.8,
+        vcaMode: .env,
+        lfoWaveform: .sh, lfoRate: 4.2, lfoDepth: 0.6, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 2, benderVcfSens: 1, portamentoTime: 0.3, portamentoOn: false,
+        echoVolume: 0.35, echoTime: 0.6, echoRepeat: 0.4,
+        limiterThreshold: -3, limiterCeiling: 0
+    )
+
+    static let mothWingFlutter = SynthPreset(
+        id: UUID(uuidString: "5EE13254-EBA0-45C7-A1D5-E90A5B610C31")!,
+        name: "Moth Wing Flutter", createdAt: referenceDate,
+        vcoRange: .two, vcoTune: -2.4, vcoPulseWidth: 0.4, vcoPwmSource: .lfo,
+        mixSawLevel: 0.25, mixPulseLevel: 0.3, mixSubLevel: 0.1, mixNoiseLevel: 0.35, mixSubMode: .minus1Square,
+        filterCutoff: 2600, filterResonance: 0.2, filterEnvAmount: 0.25, filterLfoOn: true, filterKeyFollow: 0.35,
+        attack: 0.35, decay: 0.4, sustain: 0.4, release: 0.7,
+        vcaMode: .env,
+        lfoWaveform: .triangle, lfoRate: 7.5, lfoDepth: 0.45, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 1.5, benderVcfSens: 0.5, portamentoTime: 0.15, portamentoOn: false,
+        echoVolume: 0.3, echoTime: 0.25, echoRepeat: 0.3,
+        limiterThreshold: -3, limiterCeiling: 0
+    )
+
+    static let harborFog = SynthPreset(
+        id: UUID(uuidString: "F2230D19-37D2-4BA9-A705-F333B379AE8D")!,
+        name: "Harbor Fog", createdAt: referenceDate,
+        vcoRange: .eight, vcoTune: -1.1, vcoPulseWidth: 0.55, vcoPwmSource: .env,
+        mixSawLevel: 0.45, mixPulseLevel: 0.4, mixSubLevel: 0.65, mixNoiseLevel: 0.2, mixSubMode: .minus2Square,
+        filterCutoff: 480, filterResonance: 0.3, filterEnvAmount: 0.2, filterLfoOn: true, filterKeyFollow: 0.25,
+        attack: 2.2, decay: 1.4, sustain: 0.8, release: 3.4,
+        vcaMode: .env,
+        lfoWaveform: .triangle, lfoRate: 0.2, lfoDepth: 0.5, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 2, benderVcfSens: 0.6, portamentoTime: 1.2, portamentoOn: true,
+        echoVolume: 0.5, echoTime: 2.0, echoRepeat: 0.6,
+        limiterThreshold: -4, limiterCeiling: 0
+    )
+
+    static let brokenCompass = SynthPreset(
+        id: UUID(uuidString: "16C3796D-33E9-4581-9591-3D789694C109")!,
+        name: "Broken Compass", createdAt: referenceDate,
+        vcoRange: .four, vcoTune: 4.8, vcoPulseWidth: 0.6, vcoPwmSource: .manual,
+        mixSawLevel: 0.6, mixPulseLevel: 0.5, mixSubLevel: 0.2, mixNoiseLevel: 0.15, mixSubMode: .minus2Pulse,
+        filterCutoff: 1500, filterResonance: 0.5, filterEnvAmount: 0.4, filterLfoOn: false, filterKeyFollow: 0.5,
+        attack: 0.01, decay: 0.3, sustain: 0.5, release: 0.4,
+        vcaMode: .env,
+        lfoWaveform: .square, lfoRate: 3.5, lfoDepth: 0.2, lfoToPitchOn: false,
+        arpMode: .random, arpOctaves: 3, arpHold: true, arpRate: 9.5,
+        benderVcoSens: 3, benderVcfSens: 1, portamentoTime: 0.05, portamentoOn: false,
+        echoVolume: 0.4, echoTime: 0.35, echoRepeat: 0.4,
+        limiterThreshold: -3, limiterCeiling: 0
+    )
+
+    static let chromeVapor = SynthPreset(
+        id: UUID(uuidString: "BEC12BDC-47C7-4B3B-86E4-B6E7B1FB1D1E")!,
+        name: "Chrome Vapor", createdAt: referenceDate,
+        vcoRange: .two, vcoTune: 7.3, vcoPulseWidth: 0.3, vcoPwmSource: .manual,
+        mixSawLevel: 0.8, mixPulseLevel: 0.65, mixSubLevel: 0.1, mixNoiseLevel: 0.05, mixSubMode: .minus2Square,
+        filterCutoff: 3600, filterResonance: 0.5, filterEnvAmount: 0.55, filterLfoOn: false, filterKeyFollow: 0.45,
+        attack: 0.006, decay: 0.4, sustain: 0.65, release: 0.5,
+        vcaMode: .env,
+        lfoWaveform: .square, lfoRate: 5.5, lfoDepth: 0.15, lfoToPitchOn: true,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 5, benderVcfSens: 2, portamentoTime: 0.1, portamentoOn: false,
+        echoVolume: 0.25, echoTime: 0.3, echoRepeat: 0.28,
+        limiterThreshold: -3, limiterCeiling: 0
+    )
+
+    static let slowTide = SynthPreset(
+        id: UUID(uuidString: "5C718BBD-7061-4EF8-BA7C-C29A96092254")!,
+        name: "Slow Tide", createdAt: referenceDate,
+        vcoRange: .eight, vcoTune: 0.9, vcoPulseWidth: 0.5, vcoPwmSource: .lfo,
+        mixSawLevel: 0.5, mixPulseLevel: 0.45, mixSubLevel: 0.5, mixNoiseLevel: 0.1, mixSubMode: .minus1Square,
+        filterCutoff: 900, filterResonance: 0.2, filterEnvAmount: 0.3, filterLfoOn: true, filterKeyFollow: 0.3,
+        attack: 2.6, decay: 1.6, sustain: 0.85, release: 3.6,
+        vcaMode: .env,
+        lfoWaveform: .triangle, lfoRate: 0.15, lfoDepth: 0.45, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 2, benderVcfSens: 0.5, portamentoTime: 1.5, portamentoOn: true,
+        echoVolume: 0.45, echoTime: 2.4, echoRepeat: 0.55,
+        limiterThreshold: -4, limiterCeiling: 0
+    )
+
+    static let ashField = SynthPreset(
+        id: UUID(uuidString: "2230B95B-074F-4761-B9FF-F8D33B0AD5AE")!,
+        name: "Ash Field", createdAt: referenceDate,
+        vcoRange: .four, vcoTune: -3.5, vcoPulseWidth: 0.5, vcoPwmSource: .manual,
+        mixSawLevel: 0.2, mixPulseLevel: 0.15, mixSubLevel: 0.55, mixNoiseLevel: 0.6, mixSubMode: .minus2Square,
+        filterCutoff: 350, filterResonance: 0.4, filterEnvAmount: 0.15, filterLfoOn: true, filterKeyFollow: 0.15,
+        attack: 3.0, decay: 1.8, sustain: 0.7, release: 4.0,
+        vcaMode: .gate,
+        lfoWaveform: .sh, lfoRate: 0.6, lfoDepth: 0.35, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 1.5, benderVcfSens: 0.4, portamentoTime: 1.8, portamentoOn: true,
+        echoVolume: 0.4, echoTime: 2.8, echoRepeat: 0.5,
+        limiterThreshold: -5, limiterCeiling: 0
+    )
+
+    static let neonHallway = SynthPreset(
+        id: UUID(uuidString: "5D20BB8B-8862-4D24-838D-F65FF7136141")!,
+        name: "Neon Hallway", createdAt: referenceDate,
+        vcoRange: .four, vcoTune: 5.5, vcoPulseWidth: 0.4, vcoPwmSource: .env,
+        mixSawLevel: 0.1, mixPulseLevel: 0.2, mixSubLevel: 0.1, mixNoiseLevel: 0.6, mixSubMode: .minus2Pulse,
+        filterCutoff: 90, filterResonance: 0.75, filterEnvAmount: 0.5, filterLfoOn: true, filterKeyFollow: 0.85,
+        attack: 0.008, decay: 2.6, sustain: 0.75, release: 0.12,
+        vcaMode: .gate,
+        lfoWaveform: .sh, lfoRate: 2.2, lfoDepth: 0.4, lfoToPitchOn: true,
+        arpMode: .up, arpOctaves: 1, arpHold: true, arpRate: 5.8,
+        benderVcoSens: 5, benderVcfSens: 0.7, portamentoTime: 0.03, portamentoOn: false,
+        echoVolume: 0.75, echoTime: 0.5, echoRepeat: 0.65,
+        limiterThreshold: -10, limiterCeiling: 0
+    )
+
+    static let frostBloom = SynthPreset(
+        id: UUID(uuidString: "0E491311-19DB-4A0F-9572-B02B96F20D58")!,
+        name: "Frost Bloom", createdAt: referenceDate,
+        vcoRange: .two, vcoTune: 1.2, vcoPulseWidth: 0.5, vcoPwmSource: .manual,
+        mixSawLevel: 0.45, mixPulseLevel: 0.7, mixSubLevel: 0.05, mixNoiseLevel: 0, mixSubMode: .minus2Pulse,
+        filterCutoff: 4800, filterResonance: 0.3, filterEnvAmount: 0.7, filterLfoOn: false, filterKeyFollow: 0.8,
+        attack: 0.003, decay: 1.6, sustain: 0.1, release: 1.4,
+        vcaMode: .env,
+        lfoWaveform: .triangle, lfoRate: 4.0, lfoDepth: 0.05, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 2, benderVcfSens: 0.5, portamentoTime: 0.02, portamentoOn: false,
+        echoVolume: 0.42, echoTime: 0.48, echoRepeat: 0.4,
+        limiterThreshold: -3, limiterCeiling: 0
+    )
+
+    static let distantSignal = SynthPreset(
+        id: UUID(uuidString: "A4FD862A-BC07-453D-A937-450E8818CC83")!,
+        name: "Distant Signal", createdAt: referenceDate,
+        vcoRange: .four, vcoTune: -6.2, vcoPulseWidth: 0.5, vcoPwmSource: .manual,
+        mixSawLevel: 0, mixPulseLevel: 0.15, mixSubLevel: 0.25, mixNoiseLevel: 0.7, mixSubMode: .minus2Pulse,
+        filterCutoff: 1100, filterResonance: 0.6, filterEnvAmount: 0.35, filterLfoOn: true, filterKeyFollow: 0.5,
+        attack: 0.5, decay: 0.4, sustain: 0.2, release: 1.2,
+        vcaMode: .env,
+        lfoWaveform: .sh, lfoRate: 1.4, lfoDepth: 0.5, lfoToPitchOn: false,
+        arpMode: .updown, arpOctaves: 2, arpHold: true, arpRate: 3.2,
+        benderVcoSens: 2, benderVcfSens: 0.8, portamentoTime: 0.4, portamentoOn: false,
+        echoVolume: 0.6, echoTime: 1.6, echoRepeat: 0.55,
+        limiterThreshold: -6, limiterCeiling: 0
+    )
+
+    static let copperRain = SynthPreset(
+        id: UUID(uuidString: "4E478681-213B-42C4-9059-BBFC5C7AEE26")!,
+        name: "Copper Rain", createdAt: referenceDate,
+        vcoRange: .two, vcoTune: 4.0, vcoPulseWidth: 0.35, vcoPwmSource: .manual,
+        mixSawLevel: 0.7, mixPulseLevel: 0.5, mixSubLevel: 0.05, mixNoiseLevel: 0.1, mixSubMode: .minus2Square,
+        filterCutoff: 3200, filterResonance: 0.35, filterEnvAmount: 0.45, filterLfoOn: false, filterKeyFollow: 0.5,
+        attack: 0.004, decay: 0.3, sustain: 0.2, release: 0.35,
+        vcaMode: .env,
+        lfoWaveform: .triangle, lfoRate: 6.0, lfoDepth: 0.1, lfoToPitchOn: false,
+        arpMode: .up, arpOctaves: 2, arpHold: false, arpRate: 10.5,
+        benderVcoSens: 3, benderVcfSens: 1.2, portamentoTime: 0.08, portamentoOn: false,
+        echoVolume: 0.35, echoTime: 0.28, echoRepeat: 0.32,
+        limiterThreshold: -3, limiterCeiling: 0
+    )
+
+    static let sunkenBell = SynthPreset(
+        id: UUID(uuidString: "86675745-131D-4697-B539-19B4E115C399")!,
+        name: "Sunken Bell", createdAt: referenceDate,
+        vcoRange: .four, vcoTune: -0.8, vcoPulseWidth: 0.5, vcoPwmSource: .manual,
+        mixSawLevel: 0.3, mixPulseLevel: 0.55, mixSubLevel: 0.35, mixNoiseLevel: 0.05, mixSubMode: .minus1Square,
+        filterCutoff: 1600, filterResonance: 0.4, filterEnvAmount: 0.6, filterLfoOn: false, filterKeyFollow: 0.6,
+        attack: 0.005, decay: 2.4, sustain: 0.15, release: 2.8,
+        vcaMode: .env,
+        lfoWaveform: .triangle, lfoRate: 1.8, lfoDepth: 0.1, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 2, benderVcfSens: 0.5, portamentoTime: 0.05, portamentoOn: false,
+        echoVolume: 0.55, echoTime: 1.9, echoRepeat: 0.6,
+        limiterThreshold: -4, limiterCeiling: 0
+    )
+
+    static let gravelRoad = SynthPreset(
+        id: UUID(uuidString: "289FB5FD-B05D-4444-AEC4-DC26F405B07E")!,
+        name: "Gravel Road", createdAt: referenceDate,
+        vcoRange: .sixteen, vcoTune: -0.2, vcoPulseWidth: 0.5, vcoPwmSource: .manual,
+        mixSawLevel: 0.4, mixPulseLevel: 0.6, mixSubLevel: 0.6, mixNoiseLevel: 0.2, mixSubMode: .minus2Square,
+        filterCutoff: 220, filterResonance: 0.45, filterEnvAmount: -0.2, filterLfoOn: false, filterKeyFollow: 0.6,
+        attack: 0.005, decay: 0.18, sustain: 0.55, release: 0.3,
+        vcaMode: .env,
+        lfoWaveform: .square, lfoRate: 4.5, lfoDepth: 0.15, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 2, benderVcfSens: 0, portamentoTime: 0.12, portamentoOn: false,
+        echoVolume: 0.15, echoTime: 0.22, echoRepeat: 0.2,
+        limiterThreshold: -2, limiterCeiling: -1
+    )
+
+    static let staticBloom = SynthPreset(
+        id: UUID(uuidString: "236E22D4-5667-475C-A2EB-F446DA88E7B5")!,
+        name: "Static Bloom", createdAt: referenceDate,
+        vcoRange: .four, vcoTune: 2.8, vcoPulseWidth: 0.5, vcoPwmSource: .lfo,
+        mixSawLevel: 0.15, mixPulseLevel: 0.1, mixSubLevel: 0.2, mixNoiseLevel: 0.85, mixSubMode: .minus2Pulse,
+        filterCutoff: 600, filterResonance: 0.55, filterEnvAmount: 0.5, filterLfoOn: true, filterKeyFollow: 0.2,
+        attack: 1.4, decay: 0.8, sustain: 0.6, release: 2.2,
+        vcaMode: .env,
+        lfoWaveform: .noise, lfoRate: 0.9, lfoDepth: 0.55, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 1.5, benderVcfSens: 0.6, portamentoTime: 0.5, portamentoOn: false,
+        echoVolume: 0.5, echoTime: 1.1, echoRepeat: 0.5,
+        limiterThreshold: -4, limiterCeiling: 0
+    )
+
+    static let lastTram = SynthPreset(
+        id: UUID(uuidString: "37674A6A-2F31-4969-932F-75789259F619")!,
+        name: "Last Tram", createdAt: referenceDate,
+        vcoRange: .eight, vcoTune: -2.6, vcoPulseWidth: 0.45, vcoPwmSource: .lfo,
+        mixSawLevel: 0.4, mixPulseLevel: 0.35, mixSubLevel: 0.55, mixNoiseLevel: 0.15, mixSubMode: .minus2Square,
+        filterCutoff: 560, filterResonance: 0.3, filterEnvAmount: 0.3, filterLfoOn: true, filterKeyFollow: 0.3,
+        attack: 1.0, decay: 0.7, sustain: 0.7, release: 2.5,
+        vcaMode: .env,
+        lfoWaveform: .triangle, lfoRate: 0.4, lfoDepth: 0.4, lfoToPitchOn: false,
+        arpMode: .up, arpOctaves: 2, arpHold: true, arpRate: 2.8,
+        benderVcoSens: 2.5, benderVcfSens: 0.7, portamentoTime: 0.7, portamentoOn: false,
+        echoVolume: 0.6, echoTime: 2.0, echoRepeat: 0.6,
+        limiterThreshold: -4, limiterCeiling: 0
+    )
+
+    static let paleHorizon = SynthPreset(
+        id: UUID(uuidString: "BF54186C-B600-40A5-B8F5-AACB40C4D163")!,
+        name: "Pale Horizon", createdAt: referenceDate,
+        vcoRange: .eight, vcoTune: 0.5, vcoPulseWidth: 0.5, vcoPwmSource: .manual,
+        mixSawLevel: 0.5, mixPulseLevel: 0.4, mixSubLevel: 0.45, mixNoiseLevel: 0.05, mixSubMode: .minus1Square,
+        filterCutoff: 1800, filterResonance: 0.2, filterEnvAmount: 0.25, filterLfoOn: false, filterKeyFollow: 0.35,
+        attack: 2.0, decay: 1.3, sustain: 0.8, release: 3.0,
+        vcaMode: .env,
+        lfoWaveform: .triangle, lfoRate: 0.22, lfoDepth: 0.3, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 2, benderVcfSens: 0.5, portamentoTime: 1.0, portamentoOn: true,
+        echoVolume: 0.4, echoTime: 1.5, echoRepeat: 0.45,
+        limiterThreshold: -4, limiterCeiling: 0
+    )
+
+    static let wireFence = SynthPreset(
+        id: UUID(uuidString: "8F137EDD-F014-4459-B635-EC445427500C")!,
+        name: "Wire Fence", createdAt: referenceDate,
+        vcoRange: .two, vcoTune: 9.5, vcoPulseWidth: 0.2, vcoPwmSource: .manual,
+        mixSawLevel: 0.6, mixPulseLevel: 0.75, mixSubLevel: 0, mixNoiseLevel: 0.2, mixSubMode: .minus2Pulse,
+        filterCutoff: 2400, filterResonance: 0.6, filterEnvAmount: 0.4, filterLfoOn: false, filterKeyFollow: 0.4,
+        attack: 0.003, decay: 0.2, sustain: 0.1, release: 0.25,
+        vcaMode: .env,
+        lfoWaveform: .square, lfoRate: 9.0, lfoDepth: 0.2, lfoToPitchOn: true,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 4, benderVcfSens: 1.5, portamentoTime: 0.05, portamentoOn: false,
+        echoVolume: 0.25, echoTime: 0.2, echoRepeat: 0.22,
+        limiterThreshold: -3, limiterCeiling: 0
+    )
+
+    static let kelpForest = SynthPreset(
+        id: UUID(uuidString: "C598A398-DB6E-422F-91C9-C1529A7F6206")!,
+        name: "Kelp Forest", createdAt: referenceDate,
+        vcoRange: .sixteen, vcoTune: 0.3, vcoPulseWidth: 0.5, vcoPwmSource: .env,
+        mixSawLevel: 0.3, mixPulseLevel: 0.25, mixSubLevel: 0.85, mixNoiseLevel: 0.15, mixSubMode: .minus1Square,
+        filterCutoff: 260, filterResonance: 0.35, filterEnvAmount: 0.2, filterLfoOn: true, filterKeyFollow: 0.2,
+        attack: 2.8, decay: 1.4, sustain: 0.9, release: 4.2,
+        vcaMode: .gate,
+        lfoWaveform: .triangle, lfoRate: 0.16, lfoDepth: 0.5, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 1.5, benderVcfSens: 0.4, portamentoTime: 2.0, portamentoOn: true,
+        echoVolume: 0.5, echoTime: 3.0, echoRepeat: 0.65,
+        limiterThreshold: -5, limiterCeiling: 0
+    )
+
+    static let fadedPolaroid = SynthPreset(
+        id: UUID(uuidString: "F15C9D10-28CD-449A-BB67-5110A69FB0B7")!,
+        name: "Faded Polaroid", createdAt: referenceDate,
+        vcoRange: .eight, vcoTune: -0.4, vcoPulseWidth: 0.55, vcoPwmSource: .manual,
+        mixSawLevel: 0.55, mixPulseLevel: 0.35, mixSubLevel: 0.4, mixNoiseLevel: 0.08, mixSubMode: .minus1Square,
+        filterCutoff: 1200, filterResonance: 0.25, filterEnvAmount: 0.2, filterLfoOn: false, filterKeyFollow: 0.3,
+        attack: 1.5, decay: 1.0, sustain: 0.75, release: 2.2,
+        vcaMode: .env,
+        lfoWaveform: .triangle, lfoRate: 0.3, lfoDepth: 0.25, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 2, benderVcfSens: 0.5, portamentoTime: 0.6, portamentoOn: true,
+        echoVolume: 0.35, echoTime: 1.0, echoRepeat: 0.4,
+        limiterThreshold: -3, limiterCeiling: 0
+    )
+
+    static let steelDrizzle = SynthPreset(
+        id: UUID(uuidString: "E8A769FA-D178-4BC2-A447-BEF7C7B95EF1")!,
+        name: "Steel Drizzle", createdAt: referenceDate,
+        vcoRange: .four, vcoTune: 3.3, vcoPulseWidth: 0.5, vcoPwmSource: .manual,
+        mixSawLevel: 0.2, mixPulseLevel: 0.3, mixSubLevel: 0.1, mixNoiseLevel: 0.65, mixSubMode: .minus2Square,
+        filterCutoff: 5200, filterResonance: 0.5, filterEnvAmount: 0.35, filterLfoOn: true, filterKeyFollow: 0.4,
+        attack: 0.6, decay: 0.5, sustain: 0.3, release: 1.5,
+        vcaMode: .env,
+        lfoWaveform: .sh, lfoRate: 6.5, lfoDepth: 0.4, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 2, benderVcfSens: 1, portamentoTime: 0.25, portamentoOn: false,
+        echoVolume: 0.4, echoTime: 0.7, echoRepeat: 0.45,
+        limiterThreshold: -3, limiterCeiling: 0
+    )
+
+    static let lowTideBass = SynthPreset(
+        id: UUID(uuidString: "7D8DC053-7327-442E-8C83-803609755E6E")!,
+        name: "Low Tide Bass", createdAt: referenceDate,
+        vcoRange: .sixteen, vcoTune: -0.15, vcoPulseWidth: 0.5, vcoPwmSource: .manual,
+        mixSawLevel: 0.2, mixPulseLevel: 0.45, mixSubLevel: 0.8, mixNoiseLevel: 0.05, mixSubMode: .minus1Square,
+        filterCutoff: 160, filterResonance: 0.5, filterEnvAmount: -0.25, filterLfoOn: false, filterKeyFollow: 0.65,
+        attack: 0.004, decay: 0.2, sustain: 0.6, release: 0.4,
+        vcaMode: .env,
+        lfoWaveform: .triangle, lfoRate: 1.0, lfoDepth: 0.15, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 2, benderVcfSens: 0, portamentoTime: 0.18, portamentoOn: false,
+        echoVolume: 0.12, echoTime: 0.25, echoRepeat: 0.18,
+        limiterThreshold: -2, limiterCeiling: -1
+    )
+
+    static let paperLantern = SynthPreset(
+        id: UUID(uuidString: "51C1963E-FDB7-4F38-9A61-96B3381A48B6")!,
+        name: "Paper Lantern", createdAt: referenceDate,
+        vcoRange: .two, vcoTune: 0.7, vcoPulseWidth: 0.5, vcoPwmSource: .manual,
+        mixSawLevel: 0.4, mixPulseLevel: 0.5, mixSubLevel: 0.15, mixNoiseLevel: 0.1, mixSubMode: .minus2Pulse,
+        filterCutoff: 2200, filterResonance: 0.25, filterEnvAmount: 0.4, filterLfoOn: false, filterKeyFollow: 0.5,
+        attack: 0.02, decay: 1.0, sustain: 0.3, release: 1.2,
+        vcaMode: .env,
+        lfoWaveform: .triangle, lfoRate: 3.5, lfoDepth: 0.1, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 1.5, benderVcfSens: 0.4, portamentoTime: 0.1, portamentoOn: false,
+        echoVolume: 0.4, echoTime: 0.55, echoRepeat: 0.42,
+        limiterThreshold: -3, limiterCeiling: 0
+    )
+
+    static let marshLight = SynthPreset(
+        id: UUID(uuidString: "9E759150-F6DB-4F6E-AEC8-6CA1216A710C")!,
+        name: "Marsh Light", createdAt: referenceDate,
+        vcoRange: .four, vcoTune: -1.6, vcoPulseWidth: 0.6, vcoPwmSource: .lfo,
+        mixSawLevel: 0.35, mixPulseLevel: 0.3, mixSubLevel: 0.6, mixNoiseLevel: 0.25, mixSubMode: .minus2Square,
+        filterCutoff: 400, filterResonance: 0.4, filterEnvAmount: 0.3, filterLfoOn: true, filterKeyFollow: 0.25,
+        attack: 2.4, decay: 1.6, sustain: 0.75, release: 3.5,
+        vcaMode: .env,
+        lfoWaveform: .sh, lfoRate: 0.3, lfoDepth: 0.4, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 2, benderVcfSens: 0.6, portamentoTime: 1.3, portamentoOn: true,
+        echoVolume: 0.5, echoTime: 2.2, echoRepeat: 0.55,
+        limiterThreshold: -4, limiterCeiling: 0
+    )
+
+    static let dieselHum = SynthPreset(
+        id: UUID(uuidString: "FF01438E-BDE6-4C9A-B618-95CA334CCF50")!,
+        name: "Diesel Hum", createdAt: referenceDate,
+        vcoRange: .sixteen, vcoTune: 0.1, vcoPulseWidth: 0.5, vcoPwmSource: .manual,
+        mixSawLevel: 0.5, mixPulseLevel: 0.55, mixSubLevel: 0.7, mixNoiseLevel: 0.3, mixSubMode: .minus2Square,
+        filterCutoff: 180, filterResonance: 0.55, filterEnvAmount: 0.1, filterLfoOn: true, filterKeyFollow: 0.3,
+        attack: 1.8, decay: 1.0, sustain: 0.9, release: 2.0,
+        vcaMode: .gate,
+        lfoWaveform: .square, lfoRate: 8.0, lfoDepth: 0.2, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 2, benderVcfSens: 0.5, portamentoTime: 0.5, portamentoOn: false,
+        echoVolume: 0.3, echoTime: 0.6, echoRepeat: 0.35,
+        limiterThreshold: -6, limiterCeiling: 0
+    )
+
+    static let velvetFog = SynthPreset(
+        id: UUID(uuidString: "C1881897-A688-4768-A13D-45597DA6373E")!,
+        name: "Velvet Fog", createdAt: referenceDate,
+        vcoRange: .eight, vcoTune: 0.2, vcoPulseWidth: 0.5, vcoPwmSource: .manual,
+        mixSawLevel: 0.45, mixPulseLevel: 0.4, mixSubLevel: 0.5, mixNoiseLevel: 0.03, mixSubMode: .minus1Square,
+        filterCutoff: 1000, filterResonance: 0.18, filterEnvAmount: 0.15, filterLfoOn: false, filterKeyFollow: 0.3,
+        attack: 2.2, decay: 1.2, sustain: 0.85, release: 3.2,
+        vcaMode: .env,
+        lfoWaveform: .triangle, lfoRate: 0.25, lfoDepth: 0.2, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 2, benderVcfSens: 0.4, portamentoTime: 1.4, portamentoOn: true,
+        echoVolume: 0.45, echoTime: 1.8, echoRepeat: 0.5,
+        limiterThreshold: -4, limiterCeiling: 0
+    )
+
+    static let boneDust = SynthPreset(
+        id: UUID(uuidString: "F1CF6D83-4B2C-49A8-ABC1-F549B9998F36")!,
+        name: "Bone Dust", createdAt: referenceDate,
+        vcoRange: .four, vcoTune: -4.5, vcoPulseWidth: 0.5, vcoPwmSource: .manual,
+        mixSawLevel: 0.05, mixPulseLevel: 0.1, mixSubLevel: 0.15, mixNoiseLevel: 0.8, mixSubMode: .minus2Pulse,
+        filterCutoff: 2600, filterResonance: 0.45, filterEnvAmount: 0.3, filterLfoOn: true, filterKeyFollow: 0.3,
+        attack: 0.9, decay: 0.7, sustain: 0.2, release: 1.6,
+        vcaMode: .env,
+        lfoWaveform: .sh, lfoRate: 2.0, lfoDepth: 0.5, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
+        benderVcoSens: 1.5, benderVcfSens: 0.5, portamentoTime: 0.4, portamentoOn: false,
+        echoVolume: 0.4, echoTime: 1.2, echoRepeat: 0.45,
+        limiterThreshold: -4, limiterCeiling: 0
+    )
+
+    static let wanderingStar = SynthPreset(
+        id: UUID(uuidString: "6E2C6073-00B4-4F57-8ECC-C533E1CC5416")!,
+        name: "Wandering Star", createdAt: referenceDate,
+        vcoRange: .four, vcoTune: 1.5, vcoPulseWidth: 0.5, vcoPwmSource: .lfo,
+        mixSawLevel: 0.4, mixPulseLevel: 0.45, mixSubLevel: 0.3, mixNoiseLevel: 0.1, mixSubMode: .minus1Square,
+        filterCutoff: 1800, filterResonance: 0.3, filterEnvAmount: 0.3, filterLfoOn: false, filterKeyFollow: 0.4,
+        attack: 0.02, decay: 0.5, sustain: 0.55, release: 0.9,
+        vcaMode: .env,
+        lfoWaveform: .triangle, lfoRate: 0.5, lfoDepth: 0.3, lfoToPitchOn: false,
+        arpMode: .up, arpOctaves: 3, arpHold: true, arpRate: 4.0,
+        benderVcoSens: 2, benderVcfSens: 0.6, portamentoTime: 0.2, portamentoOn: false,
+        echoVolume: 0.45, echoTime: 1.5, echoRepeat: 0.5,
+        limiterThreshold: -4, limiterCeiling: 0
+    )
+
+    static let crackedMirror = SynthPreset(
+        id: UUID(uuidString: "3B3B7BBC-5E0D-40F1-BA14-118A28B78558")!,
+        name: "Cracked Mirror", createdAt: referenceDate,
+        vcoRange: .two, vcoTune: 6.6, vcoPulseWidth: 0.15, vcoPwmSource: .manual,
+        mixSawLevel: 0.75, mixPulseLevel: 0.6, mixSubLevel: 0.05, mixNoiseLevel: 0.25, mixSubMode: .minus2Pulse,
+        filterCutoff: 4400, filterResonance: 0.8, filterEnvAmount: 0.6, filterLfoOn: false, filterKeyFollow: 0.5,
+        attack: 0.004, decay: 0.25, sustain: 0.3, release: 0.3,
+        vcaMode: .env,
+        lfoWaveform: .square, lfoRate: 13.0, lfoDepth: 0.15, lfoToPitchOn: true,
+        arpMode: .random, arpOctaves: 2, arpHold: false, arpRate: 12.0,
+        benderVcoSens: 5, benderVcfSens: 2.5, portamentoTime: 0.03, portamentoOn: false,
+        echoVolume: 0.3, echoTime: 0.3, echoRepeat: 0.32,
+        limiterThreshold: -3, limiterCeiling: 0
     )
 }

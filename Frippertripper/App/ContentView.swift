@@ -8,7 +8,7 @@ struct ContentView: View {
     @State private var engine = SynthEngine()
     @State private var presetStore = PresetStore()
     @State private var selectedPage = 0
-    @State private var isKeyboardOpen = false
+    @State private var isKeyboardOpen = true
     @State private var isFxPresented = false
     @State private var isPresetsPresented = false
     @Environment(\.scenePhase) private var scenePhase
@@ -77,7 +77,7 @@ struct ContentView: View {
                     .font(.system(size: 14, weight: .bold))
                     .foregroundStyle(.white)
                     .tracking(1.5)
-                Text("SYNTH AND DELAY LOOPER")
+                Text("SYNTH AND ECHO MACHINE")
                     .font(.system(size: 9, weight: .regular))
                     .foregroundStyle(.secondary)
                     .tracking(0.8)
