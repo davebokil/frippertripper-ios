@@ -34,22 +34,26 @@ struct FrontPanelPagerView: View {
     // page's panels report their natural height via `PanelHeightPreferenceKey`;
     // the tallest one measured is then fed back in as every panel's `matchedHeight`,
     // so the group settles on one uniform panel size instead of a hardcoded guess.
+    // Phone stays single-column with each panel at its own natural height (matching
+    // was never the issue there, and forcing it made short panels look padded/empty).
     @State private var page0MatchedHeight: CGFloat?
     @State private var page1MatchedHeight: CGFloat?
+
+    private var isMatchingPanelHeights: Bool { horizontalSizeClass == .regular }
 
     var body: some View {
         TabView(selection: $selectedPage) {
             page {
-                VcoPanelView(engine: engine, matchedHeight: page0MatchedHeight)
-                SourceMixerPanelView(engine: engine, matchedHeight: page0MatchedHeight)
-                FilterPanelView(engine: engine, matchedHeight: page0MatchedHeight)
+                VcoPanelView(engine: engine, matchedHeight: isMatchingPanelHeights ? page0MatchedHeight : nil)
+                SourceMixerPanelView(engine: engine, matchedHeight: isMatchingPanelHeights ? page0MatchedHeight : nil)
+                FilterPanelView(engine: engine, matchedHeight: isMatchingPanelHeights ? page0MatchedHeight : nil)
             }
             .onPreferenceChange(PanelHeightPreferenceKey.self) { page0MatchedHeight = $0 }
             .tag(0)
             page {
-                EnvelopePanelView(engine: engine, matchedHeight: page1MatchedHeight)
-                VcaPanelView(engine: engine, matchedHeight: page1MatchedHeight)
-                LfoPanelView(engine: engine, matchedHeight: page1MatchedHeight)
+                EnvelopePanelView(engine: engine, matchedHeight: isMatchingPanelHeights ? page1MatchedHeight : nil)
+                VcaPanelView(engine: engine, matchedHeight: isMatchingPanelHeights ? page1MatchedHeight : nil)
+                LfoPanelView(engine: engine, matchedHeight: isMatchingPanelHeights ? page1MatchedHeight : nil)
             }
             .onPreferenceChange(PanelHeightPreferenceKey.self) { page1MatchedHeight = $0 }
             .tag(1)
