@@ -1,14 +1,14 @@
-# Auramin
+# REVE Model 1
 
 A native iOS monophonic synthesizer, inspired by classic analog mono-synths
 (SH-101-style architecture: VCO → mixer → filter → VCA, plus arpeggiator,
 LFO, and an echo/limiter FX rack). Built with SwiftUI and a from-scratch,
 zero-AVFoundation DSP engine.
 
-> The app is displayed to users as "Auramin"; the underlying Xcode project,
-> target, scheme, and bundle identifier (`com.davebokil.frippertripper`)
-> remain named `Frippertripper` and are referenced as such throughout the
-> commands below.
+> The app is displayed to users as "REVE Model 1"; the underlying Xcode
+> project, target, scheme, and bundle identifier
+> (`com.davebokil.frippertripper`) remain named `Frippertripper` and are
+> referenced as such throughout the commands below.
 
 ## Features
 

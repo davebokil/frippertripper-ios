@@ -20,7 +20,7 @@ final class PresetTests: XCTestCase {
 
     func testApplyingPresetRestoresEngineState() {
         let source = SynthEngine()
-        source.vcoRange = .four
+        source.vcoRange = .sixteen
         source.mixNoiseLevel = 0.8
         source.arpMode = .updown
         source.arpOctaves = 3
@@ -28,11 +28,11 @@ final class PresetTests: XCTestCase {
         let preset = source.makePreset(name: "Test")
 
         let target = SynthEngine()
-        XCTAssertNotEqual(target.vcoRange, .four) // sanity: differs before applying
+        XCTAssertNotEqual(target.vcoRange, .sixteen) // sanity: differs before applying
 
         target.apply(preset)
 
-        XCTAssertEqual(target.vcoRange, .four)
+        XCTAssertEqual(target.vcoRange, .sixteen)
         XCTAssertEqual(target.mixNoiseLevel, 0.8)
         XCTAssertEqual(target.arpMode, .updown)
         XCTAssertEqual(target.arpOctaves, 3)

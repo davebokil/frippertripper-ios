@@ -71,15 +71,15 @@ struct SynthPreset: Identifiable, Codable, Equatable {
     /// separate hand-rolled reset function.
     static let factoryDefault = SynthPreset(
         id: UUID(), name: "Default", createdAt: Date(),
-        vcoRange: .eight, vcoTune: 0, vcoPulseWidth: 0.5, vcoPwmSource: .manual,
-        mixSawLevel: 0.45, mixPulseLevel: 0.45, mixSubLevel: 0.4, mixNoiseLevel: 0, mixSubMode: .minus1Square,
-        filterCutoff: 3500, filterResonance: 0.3, filterEnvAmount: 0, filterLfoOn: false, filterKeyFollow: 0,
-        attack: 0.02, decay: 0.15, sustain: 0.7, release: 0.3,
+        vcoRange: .eight, vcoTune: 3.7901, vcoPulseWidth: 0.9013, vcoPwmSource: .manual,
+        mixSawLevel: 0.7441, mixPulseLevel: 0.5732, mixSubLevel: 0.1792, mixNoiseLevel: 0.202, mixSubMode: .minus2Pulse,
+        filterCutoff: 156.8622, filterResonance: 0.0593, filterEnvAmount: 0.8067, filterLfoOn: false, filterKeyFollow: 0.0603,
+        attack: 0.2996, decay: 0.1853, sustain: 0.7622, release: 2.8338,
         vcaMode: .env,
-        lfoWaveform: .triangle, lfoRate: 5, lfoDepth: 0, lfoToPitchOn: false,
-        arpMode: .off, arpOctaves: 1, arpHold: false, arpRate: 5,
-        benderVcoSens: 2, benderVcfSens: 0, portamentoTime: 0.15, portamentoOn: false,
-        echoVolume: 0.3, echoTime: 0.35, echoRepeat: 0.4,
+        lfoWaveform: .triangle, lfoRate: 3.006, lfoDepth: 0.0308, lfoToPitchOn: false,
+        arpMode: .off, arpOctaves: 3, arpHold: false, arpRate: 14.1744,
+        benderVcoSens: 0.3078, benderVcfSens: 0.1779, portamentoTime: 3.4664, portamentoOn: false,
+        echoVolume: 0.6077, echoTime: 2.6569, echoRepeat: 0.6978,
         limiterThreshold: -3, limiterCeiling: 0
     )
 }
