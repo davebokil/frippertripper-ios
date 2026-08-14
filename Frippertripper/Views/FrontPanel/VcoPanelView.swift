@@ -2,9 +2,10 @@ import SwiftUI
 
 struct VcoPanelView: View {
     @Bindable var engine: SynthEngine
+    var matchedHeight: CGFloat? = nil
 
     var body: some View {
-        PanelSection(title: "VCO") {
+        PanelSection(title: "VCO", matchedHeight: matchedHeight) {
             HStack(spacing: 18) {
                 KnobSwitchView(label: "Range", selection: $engine.vcoRange, options: [.sixteen, .eight, .four, .two]) {
                     switch $0 {

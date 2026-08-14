@@ -11,11 +11,15 @@ struct KnobView: View {
     var formatter: (Float) -> String = { String(format: "%.2f", $0) }
     var size: CGFloat = 52
 
+    @Environment(\.panelControlScale) private var controlScale
     @State private var dragStartValue: Float?
 
-    private let sweepDistance: CGFloat = 300
+    private let baseSweepDistance: CGFloat = 300
     private let minAngle: Double = -135
     private let maxAngle: Double = 135
+
+    private var scaledSize: CGFloat { size * controlScale }
+    private var sweepDistance: CGFloat { baseSweepDistance * controlScale }
 
     var body: some View {
         VStack(spacing: 4) {
@@ -27,11 +31,11 @@ struct KnobView: View {
                     .overlay(Circle().stroke(Color(white: 0.35), lineWidth: 1))
                 Capsule()
                     .fill(Color.brandOrange)
-                    .frame(width: 3, height: size * 0.32)
-                    .offset(y: -size * 0.22)
+                    .frame(width: 3, height: scaledSize * 0.32)
+                    .offset(y: -scaledSize * 0.22)
                     .rotationEffect(.degrees(angleDegrees))
             }
-            .frame(width: size, height: size)
+            .frame(width: scaledSize, height: scaledSize)
             .contentShape(Circle())
             .gesture(
                 DragGesture(minimumDistance: 0)
@@ -57,10 +61,10 @@ struct KnobView: View {
             }
 
             Text(label)
-                .font(.system(size: 10, weight: .medium))
+                .font(.system(size: 10 * controlScale, weight: .medium))
                 .foregroundStyle(.secondary)
             Text(formatter(value))
-                .font(.system(size: 9, design: .monospaced))
+                .font(.system(size: 9 * controlScale, design: .monospaced))
                 .foregroundStyle(.primary.opacity(0.8))
         }
     }

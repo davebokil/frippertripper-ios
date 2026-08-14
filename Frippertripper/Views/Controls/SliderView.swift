@@ -13,6 +13,9 @@ struct SliderView: View {
     let range: ClosedRange<Float>
     var orientation: SliderOrientation = .vertical
     var scale: ControlScale = .linear
+    var length: CGFloat = 110
+
+    @Environment(\.panelControlScale) private var controlScale
 
     var body: some View {
         VStack(spacing: 4) {
@@ -42,12 +45,12 @@ struct SliderView: View {
                 )
             }
             .frame(
-                width: orientation == .vertical ? 26 : nil,
-                height: orientation == .horizontal ? 26 : nil
+                width: orientation == .vertical ? 26 * controlScale : length * controlScale,
+                height: orientation == .vertical ? length * controlScale : 26 * controlScale
             )
 
             Text(label)
-                .font(.system(size: 10, weight: .medium))
+                .font(.system(size: 10 * controlScale, weight: .medium))
                 .foregroundStyle(.secondary)
         }
     }

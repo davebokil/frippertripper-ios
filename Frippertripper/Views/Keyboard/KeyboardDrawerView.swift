@@ -12,8 +12,17 @@ struct KeyboardDrawerView: View {
     @State private var octaveSpan = 2 // how many octaves are visible at once - fewer = wider keys
     @State private var isHoldMode = false
 
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
     private let octaveRange = -3...3
     private let spanRange = 1...3
+
+    /// iPad's regular width size class has a lot of vertical room the phone layout
+    /// doesn't - the keyboard's fixed phone-sized height was leaving most of that
+    /// space unused as flat black background, so it grows on iPad instead.
+    private var keyboardHeight: CGFloat {
+        horizontalSizeClass == .regular ? 320 : 150
+    }
 
     var body: some View {
         VStack(spacing: 6) {
@@ -25,7 +34,7 @@ struct KeyboardDrawerView: View {
             controlRow
 
             PianoKeyboardView(engine: engine, octaveOffset: octaveOffset, octaveSpan: octaveSpan, isHoldMode: isHoldMode)
-                .frame(height: 150)
+                .frame(height: keyboardHeight)
                 .padding(.horizontal, 10)
                 .padding(.bottom, 10)
         }

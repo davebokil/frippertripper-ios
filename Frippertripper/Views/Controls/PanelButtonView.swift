@@ -7,12 +7,14 @@ struct PanelButtonView: View {
     var isOn: Bool = false
     let action: () -> Void
 
+    @Environment(\.panelControlScale) private var controlScale
+
     var body: some View {
         Button(action: action) {
             Text(label)
-                .font(.system(size: 11, weight: .semibold))
-                .padding(.horizontal, 12)
-                .frame(minWidth: 64, minHeight: 36)
+                .font(.system(size: 11 * controlScale, weight: .semibold))
+                .padding(.horizontal, 12 * controlScale)
+                .frame(minWidth: 64 * controlScale, minHeight: 36 * controlScale)
                 .background(isOn ? Color.brandOrange.opacity(0.75) : Color(white: 0.16))
                 .foregroundStyle(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 8))

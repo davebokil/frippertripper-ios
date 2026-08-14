@@ -2,9 +2,10 @@ import SwiftUI
 
 struct EnvelopePanelView: View {
     @Bindable var engine: SynthEngine
+    var matchedHeight: CGFloat? = nil
 
     var body: some View {
-        PanelSection(title: "Envelope") {
+        PanelSection(title: "Envelope", matchedHeight: matchedHeight) {
             HStack(spacing: 18) {
                 KnobView(label: "Attack", value: $engine.attack, range: 0.001...3, scale: .logarithmic, formatter: secondsLabel)
                 KnobView(label: "Decay", value: $engine.decay, range: 0.001...3, scale: .logarithmic, formatter: secondsLabel)

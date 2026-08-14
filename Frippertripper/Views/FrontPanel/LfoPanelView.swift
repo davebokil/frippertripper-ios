@@ -2,9 +2,10 @@ import SwiftUI
 
 struct LfoPanelView: View {
     @Bindable var engine: SynthEngine
+    var matchedHeight: CGFloat? = nil
 
     var body: some View {
-        PanelSection(title: "LFO") {
+        PanelSection(title: "LFO", matchedHeight: matchedHeight) {
             HStack(spacing: 18) {
                 ToggleSwitchView(label: "Wave", selection: $engine.lfoWaveform, options: [.triangle, .square, .sh, .noise]) {
                     switch $0 {

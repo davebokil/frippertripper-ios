@@ -9,11 +9,15 @@ struct KnobSwitchView<Option: Equatable>: View {
     let optionLabel: (Option) -> String
     var size: CGFloat = 52
 
+    @Environment(\.panelControlScale) private var controlScale
     @State private var dragStartIndex: Int?
 
-    private let sweepDistance: CGFloat = 180
+    private let baseSweepDistance: CGFloat = 180
     private let minAngle: Double = -135
     private let maxAngle: Double = 135
+
+    private var scaledSize: CGFloat { size * controlScale }
+    private var sweepDistance: CGFloat { baseSweepDistance * controlScale }
 
     private var currentIndex: Int { options.firstIndex(of: selection) ?? 0 }
 
@@ -25,11 +29,11 @@ struct KnobSwitchView<Option: Equatable>: View {
                     .overlay(Circle().stroke(Color(white: 0.35), lineWidth: 1))
                 Capsule()
                     .fill(Color.brandOrange)
-                    .frame(width: 3, height: size * 0.32)
-                    .offset(y: -size * 0.22)
+                    .frame(width: 3, height: scaledSize * 0.32)
+                    .offset(y: -scaledSize * 0.22)
                     .rotationEffect(.degrees(angleDegrees(for: currentIndex)))
             }
-            .frame(width: size, height: size)
+            .frame(width: scaledSize, height: scaledSize)
             .contentShape(Circle())
             .gesture(
                 DragGesture(minimumDistance: 0)
@@ -44,10 +48,10 @@ struct KnobSwitchView<Option: Equatable>: View {
             )
 
             Text(label)
-                .font(.system(size: 10, weight: .medium))
+                .font(.system(size: 10 * controlScale, weight: .medium))
                 .foregroundStyle(.secondary)
             Text(optionLabel(selection))
-                .font(.system(size: 9, design: .monospaced))
+                .font(.system(size: 9 * controlScale, design: .monospaced))
                 .foregroundStyle(.primary.opacity(0.8))
         }
     }

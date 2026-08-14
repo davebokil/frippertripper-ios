@@ -2,9 +2,10 @@ import SwiftUI
 
 struct FilterPanelView: View {
     @Bindable var engine: SynthEngine
+    var matchedHeight: CGFloat? = nil
 
     var body: some View {
-        PanelSection(title: "Filter") {
+        PanelSection(title: "Filter", matchedHeight: matchedHeight) {
             HStack(spacing: 18) {
                 KnobView(
                     label: "Cutoff", value: $engine.filterCutoff, range: 20...20000, scale: .logarithmic,

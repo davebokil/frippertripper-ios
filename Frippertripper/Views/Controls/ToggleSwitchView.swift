@@ -10,6 +10,8 @@ struct ToggleSwitchView<Option: Equatable>: View {
     let options: [Option]
     let optionLabel: (Option) -> String
 
+    @Environment(\.panelControlScale) private var controlScale
+
     var body: some View {
         Button {
             let index = options.firstIndex(of: selection) ?? 0
@@ -17,12 +19,12 @@ struct ToggleSwitchView<Option: Equatable>: View {
         } label: {
             VStack(spacing: 4) {
                 Text(optionLabel(selection))
-                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                    .frame(minWidth: 48, minHeight: 32)
+                    .font(.system(size: 11 * controlScale, weight: .semibold, design: .monospaced))
+                    .frame(minWidth: 48 * controlScale, minHeight: 32 * controlScale)
                     .background(Color(white: 0.16))
                     .clipShape(RoundedRectangle(cornerRadius: 6))
                 Text(label)
-                    .font(.system(size: 9))
+                    .font(.system(size: 9 * controlScale))
                     .foregroundStyle(.secondary)
             }
         }

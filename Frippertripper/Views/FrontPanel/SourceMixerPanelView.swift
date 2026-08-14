@@ -2,21 +2,18 @@ import SwiftUI
 
 struct SourceMixerPanelView: View {
     @Bindable var engine: SynthEngine
+    var matchedHeight: CGFloat? = nil
 
     var body: some View {
-        PanelSection(title: "Source Mixer") {
+        PanelSection(title: "Source Mixer", matchedHeight: matchedHeight) {
             HStack(spacing: 0) {
                 SliderView(label: "Saw", value: $engine.mixSawLevel, range: 0...1)
-                    .frame(height: 110)
                 Spacer()
                 SliderView(label: "Pulse", value: $engine.mixPulseLevel, range: 0...1)
-                    .frame(height: 110)
                 Spacer()
                 SliderView(label: "Sub", value: $engine.mixSubLevel, range: 0...1)
-                    .frame(height: 110)
                 Spacer()
                 SliderView(label: "Noise", value: $engine.mixNoiseLevel, range: 0...1)
-                    .frame(height: 110)
                 Spacer()
                 ToggleSwitchView(
                     label: "Sub Mode", selection: $engine.mixSubMode,

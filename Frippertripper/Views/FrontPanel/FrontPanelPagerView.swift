@@ -12,20 +12,46 @@ struct FrontPanelPagerView: View {
     @Bindable var engine: SynthEngine
     @Binding var selectedPage: Int
     var onPatchSelect: () -> Void
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    /// On a phone, panels stack in a single column (the layout this view was
+    /// designed for). On iPad's regular width size class, that leaves one narrow
+    /// column of panels with a large dead area beside and below them, so panels
+    /// are arranged two-up instead to use the extra width.
+    private var columns: [GridItem] {
+        horizontalSizeClass == .regular
+            ? [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
+            : [GridItem(.flexible())]
+    }
+
+    private var controlScale: CGFloat {
+        horizontalSizeClass == .regular ? 1.35 : 1
+    }
+
+    // Panels mixing different control types (knobs vs. tall sliders, or a lone
+    // toggle vs. a row of knobs) naturally size to very different heights, which
+    // reads as sloppy once panels sit side by side on iPad's 2-column grid. Each
+    // page's panels report their natural height via `PanelHeightPreferenceKey`;
+    // the tallest one measured is then fed back in as every panel's `matchedHeight`,
+    // so the group settles on one uniform panel size instead of a hardcoded guess.
+    @State private var page0MatchedHeight: CGFloat?
+    @State private var page1MatchedHeight: CGFloat?
 
     var body: some View {
         TabView(selection: $selectedPage) {
             page {
-                VcoPanelView(engine: engine)
-                SourceMixerPanelView(engine: engine)
-                FilterPanelView(engine: engine)
+                VcoPanelView(engine: engine, matchedHeight: page0MatchedHeight)
+                SourceMixerPanelView(engine: engine, matchedHeight: page0MatchedHeight)
+                FilterPanelView(engine: engine, matchedHeight: page0MatchedHeight)
             }
+            .onPreferenceChange(PanelHeightPreferenceKey.self) { page0MatchedHeight = $0 }
             .tag(0)
             page {
-                EnvelopePanelView(engine: engine)
-                VcaPanelView(engine: engine)
-                LfoPanelView(engine: engine)
+                EnvelopePanelView(engine: engine, matchedHeight: page1MatchedHeight)
+                VcaPanelView(engine: engine, matchedHeight: page1MatchedHeight)
+                LfoPanelView(engine: engine, matchedHeight: page1MatchedHeight)
             }
+            .onPreferenceChange(PanelHeightPreferenceKey.self) { page1MatchedHeight = $0 }
             .tag(1)
             page {
                 ArpPanelView(engine: engine)
@@ -41,12 +67,13 @@ struct FrontPanelPagerView: View {
             .tag(2)
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
+        .environment(\.panelControlScale, controlScale)
     }
 
     @ViewBuilder
     private func page(@ViewBuilder _ content: () -> some View) -> some View {
         ScrollView {
-            VStack(spacing: 12) {
+            LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
                 content()
             }
             .padding(.horizontal, 14)
