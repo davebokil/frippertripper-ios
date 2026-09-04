@@ -33,18 +33,20 @@ final class CommandQueue<Element>: @unchecked Sendable {
         tail = next
     }
 
+    /// Calls `handler` directly inside the locked loop rather than draining into a
+    /// temporary array first, avoiding a per-call heap allocation on the render
+    /// thread. Safe because the handlers (`handleNoteOn`/`handleNoteOff`/
+    /// `handleAllNotesOff`) are small, non-blocking, and never push back onto this
+    /// same queue (`os_unfair_lock` is non-reentrant).
     func drain(_ handler: (Element) -> Void) {
         os_unfair_lock_lock(&lock)
-        var drained: [Element] = []
-        drained.reserveCapacity(4)
+        defer { os_unfair_lock_unlock(&lock) }
         while head != tail {
             if let item = buffer[head] {
-                drained.append(item)
                 buffer[head] = nil
+                handler(item)
             }
             head = (head + 1) % capacity
         }
-        os_unfair_lock_unlock(&lock)
-        for item in drained { handler(item) }
     }
 }

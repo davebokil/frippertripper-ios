@@ -18,8 +18,8 @@ settings:
     ENABLE_PREVIEWS: true
     ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
-    MARKETING_VERSION: "1.0"
-    CURRENT_PROJECT_VERSION: "13"
+    MARKETING_VERSION: "1.1"
+    CURRENT_PROJECT_VERSION: "14"
 
 targets:
   Frippertripper:
@@ -51,7 +51,62 @@ targets:
         UIRequiresFullScreen: true
     entitlements:
       path: Generated/Frippertripper.entitlements
-      properties: {}
+      properties:
+        com.apple.security.application-groups:
+          - group.com.davebokil.frippertripper
+    dependencies:
+      - target: FrippertripperAU
+        embed: true
+
+  FrippertripperAU:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: FrippertripperAU
+      - path: Frippertripper/Audio/Engine
+      - path: Frippertripper/ViewModel
+      - path: Frippertripper/Views
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.davebokil.frippertripper.auv3
+        PRODUCT_NAME: FrippertripperAU
+        INFOPLIST_KEY_CFBundleDisplayName: "REVE Model 1 AU"
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: A8BS37XPJB
+        SKIP_INSTALL: true
+      configs:
+        Release:
+          # Same manual-signing rationale as the Frippertripper target - Automatic
+          # would also resolve a Development profile even for Archive. This is a
+          # *separate* App ID from the container app, so it needs its own
+          # Distribution provisioning profile once the App ID + capability exist in
+          # the Developer Portal (see docs/auv3-plan.md's Stage 1 non-code blocker).
+          CODE_SIGN_STYLE: Manual
+          CODE_SIGN_IDENTITY: Apple Distribution
+          PROVISIONING_PROFILE_SPECIFIER: "Frippertripper AU App Store"
+    info:
+      path: Generated/FrippertripperAU-Info.plist
+      properties:
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.AudioUnit-UI
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).AudioUnitViewController
+          NSExtensionAttributes:
+            AudioComponents:
+              - type: aumu
+                subtype: Frip
+                manufacturer: Dbkl
+                name: "Dbkl: REVE Model 1"
+                description: "REVE Model 1 - monophonic analog-style synth"
+                version: 1
+                sandboxSafe: true
+                tags:
+                  - Synthesizer
+    entitlements:
+      path: Generated/FrippertripperAU.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.davebokil.frippertripper
 
   FrippertripperTests:
     type: bundle.unit-test
@@ -70,6 +125,7 @@ schemes:
     build:
       targets:
         Frippertripper: all
+        FrippertripperAU: all
         FrippertripperTests: [test]
     run:
       config: Debug

@@ -5,13 +5,20 @@ import SwiftUI
 /// and a floating keyboard-reveal button overlaid - matching the product shape from
 /// the plan.
 struct ContentView: View {
-    @State private var engine = SynthEngine()
+    @State private var audioEngineController: AudioEngineController
+    @State private var engine: SynthEngine
     @State private var presetStore = PresetStore()
     @State private var selectedPage = 0
     @State private var isKeyboardOpen = true
     @State private var isFxPresented = false
     @State private var isPresetsPresented = false
     @Environment(\.scenePhase) private var scenePhase
+
+    init() {
+        let controller = AudioEngineController()
+        _audioEngineController = State(wrappedValue: controller)
+        _engine = State(wrappedValue: SynthEngine(core: controller.core, onFirstNote: { controller.start() }))
+    }
 
     var body: some View {
         ZStack {
@@ -49,7 +56,7 @@ struct ContentView: View {
         .preferredColorScheme(.dark)
         .onAppear {
             engine.restoreLastSession()
-            engine.audioEngineController.start()
+            audioEngineController.start()
         }
         .onChange(of: scenePhase) { _, newPhase in
             // Specifically .background, not "!= .active" - presenting any .sheet
@@ -65,7 +72,7 @@ struct ContentView: View {
             // every knob tweak.
             if newPhase == .background {
                 engine.saveSession()
-                engine.audioEngineController.stop()
+                audioEngineController.stop()
             }
         }
     }

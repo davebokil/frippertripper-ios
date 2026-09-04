@@ -1,82 +1,113 @@
+import AVFoundation
 import Foundation
 import Observation
 
 /// The Swift analog of the source's "module-singleton refs + `watch()` push into the
 /// audio graph" pattern (`app/composables/useAudioEngine.ts`): one `@Observable`
 /// instance, owned by the root view and passed down explicitly, exposing the full
-/// ~35-parameter surface as plain properties. Each `didSet` forwards the change into
-/// `SynthEngineCore` — either a direct assignment (discrete params) or a smoothed
-/// `RampedParameter.setTarget` call (continuous params, tau = 0.01s to match the
-/// source's default `setTargetAtTime` smoothing).
+/// ~35-parameter surface as plain properties. Each `didSet` routes the change through
+/// `route(_:_:)` to `AUParameterMapping.write` - either straight onto `SynthEngineCore`
+/// (standalone app) or through the AUv3 extension's `AUParameterTree` first, when one
+/// is attached (see `auParameterTree`'s doc comment).
 @MainActor
 @Observable
 final class SynthEngine {
-    let audioEngineController = AudioEngineController()
-    var core: SynthEngineCore { audioEngineController.core }
+    let core: SynthEngineCore
+    private let onFirstNote: (() -> Void)?
+
+    /// Set only by the AUv3 extension (`AudioUnitViewController`), after
+    /// constructing this `SynthEngine` around the extension's own `core`. When
+    /// present, every parameter write below routes through the tree instead of
+    /// `core` directly, so twisting a knob in this reused SwiftUI panel produces
+    /// the same host-visible `AUParameterTree` automation the host's own generic
+    /// parameter UI would (docs/auv3-plan.md Stage 4's verification requirement).
+    /// `nil` in the standalone app, which has no tree.
+    var auParameterTree: AUParameterTree?
+
+    init(core: SynthEngineCore, onFirstNote: (() -> Void)? = nil) {
+        self.core = core
+        self.onFirstNote = onFirstNote
+    }
+
+    /// Routes through `auParameterTree` when attached (which round-trips back to
+    /// `AUParameterMapping.write` via `implementorValueObserver`) or calls it
+    /// directly otherwise - either way there's exactly one place
+    /// (`AUParameterMapping`) that knows how to turn a raw value into a write
+    /// onto `core`.
+    private func route(_ id: AUParameterID, _ rawValue: Float) {
+        if let tree = auParameterTree, let parameter = tree.parameter(withAddress: id.rawValue) {
+            parameter.setValue(rawValue, originator: nil)
+        } else {
+            AUParameterMapping.write(address: id.rawValue, value: rawValue, to: core)
+        }
+    }
 
     // MARK: - VCO
-    var vcoRange: VcoRange = .eight { didSet { core.vcoRange = vcoRange } }
-    var vcoTune: Float = 3.7901 { didSet { core.vcoTune = vcoTune } }
-    var vcoPulseWidth: Float = 0.9013 { didSet { core.vcoPulseWidthParam.setTarget(vcoPulseWidth, tau: 0.01) } }
-    var vcoPwmSource: PwmSource = .manual { didSet { core.vcoPwmSource = vcoPwmSource } }
+    var vcoRange: VcoRange = .eight { didSet { route(.vcoRange, AUParameterMapping.rawValue(for: vcoRange)) } }
+    var vcoTune: Float = 3.7901 { didSet { route(.vcoTune, vcoTune) } }
+    var vcoPulseWidth: Float = 0.9013 { didSet { route(.vcoPulseWidth, vcoPulseWidth) } }
+    var vcoPwmSource: PwmSource = .manual { didSet { route(.vcoPwmSource, AUParameterMapping.rawValue(for: vcoPwmSource)) } }
 
     // MARK: - Source mixer
-    var mixSawLevel: Float = 0.7441 { didSet { core.mixSawLevelParam.setTarget(mixSawLevel, tau: 0.01) } }
-    var mixPulseLevel: Float = 0.5732 { didSet { core.mixPulseLevelParam.setTarget(mixPulseLevel, tau: 0.01) } }
-    var mixSubLevel: Float = 0.1792 { didSet { core.mixSubLevelParam.setTarget(mixSubLevel, tau: 0.01) } }
-    var mixNoiseLevel: Float = 0.202 { didSet { core.mixNoiseLevelParam.setTarget(mixNoiseLevel, tau: 0.01) } }
-    var mixSubMode: SubMode = .minus2Pulse { didSet { core.mixSubMode = mixSubMode } }
+    var mixSawLevel: Float = 0.7441 { didSet { route(.mixSawLevel, mixSawLevel) } }
+    var mixPulseLevel: Float = 0.5732 { didSet { route(.mixPulseLevel, mixPulseLevel) } }
+    var mixSubLevel: Float = 0.1792 { didSet { route(.mixSubLevel, mixSubLevel) } }
+    var mixNoiseLevel: Float = 0.202 { didSet { route(.mixNoiseLevel, mixNoiseLevel) } }
+    var mixSubMode: SubMode = .minus2Pulse { didSet { route(.mixSubMode, AUParameterMapping.rawValue(for: mixSubMode)) } }
 
     // MARK: - Filter
-    var filterCutoff: Float = 156.8622 { didSet { core.filterCutoffKnob = filterCutoff } }
-    var filterResonance: Float = 0.0593 { didSet { core.filterResonanceParam.setTarget(filterResonance, tau: 0.01) } }
-    var filterEnvAmount: Float = 0.8067 { didSet { core.filterEnvAmountParam.setTarget(filterEnvAmount, tau: 0.01) } }
-    var filterLfoOn = false { didSet { core.filterLfoOn = filterLfoOn } }
-    var filterKeyFollow: Float = 0.0603 { didSet { core.filterKeyFollow = filterKeyFollow } }
+    var filterCutoff: Float = 156.8622 { didSet { route(.filterCutoff, filterCutoff) } }
+    var filterResonance: Float = 0.0593 { didSet { route(.filterResonance, filterResonance) } }
+    var filterEnvAmount: Float = 0.8067 { didSet { route(.filterEnvAmount, filterEnvAmount) } }
+    var filterLfoOn = false { didSet { route(.filterLfoOn, AUParameterMapping.rawValue(for: filterLfoOn)) } }
+    var filterKeyFollow: Float = 0.0603 { didSet { route(.filterKeyFollow, filterKeyFollow) } }
 
     // MARK: - Envelope (shared by filter/PWM/VCA)
-    var attack: Float = 0.2996 { didSet { core.attackSeconds = attack } }
-    var decay: Float = 0.1853 { didSet { core.decaySeconds = decay } }
-    var sustain: Float = 0.7622 { didSet { core.sustainLevel = sustain } }
-    var release: Float = 2.8338 { didSet { core.releaseSeconds = release } }
+    var attack: Float = 0.2996 { didSet { route(.attack, attack) } }
+    var decay: Float = 0.1853 { didSet { route(.decay, decay) } }
+    var sustain: Float = 0.7622 { didSet { route(.sustain, sustain) } }
+    var release: Float = 2.8338 { didSet { route(.release, release) } }
 
     // MARK: - VCA
-    var vcaMode: VcaMode = .env { didSet { core.vcaMode = vcaMode } }
+    var vcaMode: VcaMode = .env { didSet { route(.vcaMode, AUParameterMapping.rawValue(for: vcaMode)) } }
 
     // MARK: - LFO
-    var lfoWaveform: LfoWaveform = .triangle { didSet { core.lfoWaveform = lfoWaveform } }
-    var lfoRate: Float = 3.006 { didSet { core.lfoRateParam.setTarget(lfoRate, tau: 0.01) } }
-    var lfoDepth: Float = 0.0308 { didSet { core.lfoDepthParam.setTarget(lfoDepth, tau: 0.01) } }
-    var lfoToPitchOn = false { didSet { core.lfoToPitchOn = lfoToPitchOn } }
+    var lfoWaveform: LfoWaveform = .triangle { didSet { route(.lfoWaveform, AUParameterMapping.rawValue(for: lfoWaveform)) } }
+    var lfoRate: Float = 3.006 { didSet { route(.lfoRate, lfoRate) } }
+    var lfoDepth: Float = 0.0308 { didSet { route(.lfoDepth, lfoDepth) } }
+    var lfoToPitchOn = false { didSet { route(.lfoToPitchOn, AUParameterMapping.rawValue(for: lfoToPitchOn)) } }
 
     // MARK: - Arpeggiator
-    var arpMode: ArpMode = .off { didSet { core.arpMode = arpMode } }
-    var arpOctaves: Int = 3 { didSet { core.arpOctaves = arpOctaves } }
-    var arpHold = false { didSet { core.arpHold = arpHold } }
-    var arpRate: Float = 14.1744 { didSet { core.arpRate = arpRate } }
+    var arpMode: ArpMode = .off { didSet { route(.arpMode, AUParameterMapping.rawValue(for: arpMode)) } }
+    // `AUParameterTreeBuilder` advertises this as a 0-based indexed parameter
+    // labeled ["1","2","3","4"]; `AUParameterMapping.write` adds 1 back on the
+    // way in, so this side subtracts 1 on the way out.
+    var arpOctaves: Int = 3 { didSet { route(.arpOctaves, Float(arpOctaves - 1)) } }
+    var arpHold = false { didSet { route(.arpHold, AUParameterMapping.rawValue(for: arpHold)) } }
+    var arpRate: Float = 14.1744 { didSet { route(.arpRate, arpRate) } }
 
     // MARK: - Controller
-    var benderPosition: Float = 0 { didSet { core.benderPosition = benderPosition } }
-    var benderVcoSens: Float = 0.3078 { didSet { core.benderVcoSens = benderVcoSens } }
-    var benderVcfSens: Float = 0.1779 { didSet { core.benderVcfSens = benderVcfSens } }
-    var portamentoTime: Float = 3.4664 { didSet { core.portamentoTime = portamentoTime } }
-    var portamentoOn = false { didSet { core.portamentoOn = portamentoOn } }
+    var benderPosition: Float = 0 { didSet { route(.benderPosition, benderPosition) } }
+    var benderVcoSens: Float = 0.3078 { didSet { route(.benderVcoSens, benderVcoSens) } }
+    var benderVcfSens: Float = 0.1779 { didSet { route(.benderVcfSens, benderVcfSens) } }
+    var portamentoTime: Float = 3.4664 { didSet { route(.portamentoTime, portamentoTime) } }
+    var portamentoOn = false { didSet { route(.portamentoOn, AUParameterMapping.rawValue(for: portamentoOn)) } }
 
     // MARK: - Echo
-    var echoVolume: Float = 0.6077 { didSet { core.setEchoVolume(echoVolume) } }
-    var echoTime: Float = 2.6569 { didSet { core.setEchoTime(echoTime) } }
-    var echoRepeat: Float = 0.6978 { didSet { core.setEchoRepeat(echoRepeat) } }
+    var echoVolume: Float = 0.6077 { didSet { route(.echoVolume, echoVolume) } }
+    var echoTime: Float = 2.6569 { didSet { route(.echoTime, echoTime) } }
+    var echoRepeat: Float = 0.6978 { didSet { route(.echoRepeat, echoRepeat) } }
 
     // MARK: - Limiter
-    var limiterThreshold: Float = -3 { didSet { core.setLimiterThreshold(limiterThreshold) } }
-    var limiterCeiling: Float = 0 { didSet { core.setLimiterCeiling(limiterCeiling) } }
+    var limiterThreshold: Float = -3 { didSet { route(.limiterThreshold, limiterThreshold) } }
+    var limiterCeiling: Float = 0 { didSet { route(.limiterCeiling, limiterCeiling) } }
 
     // MARK: - Note input
 
     /// Primes the engine (idempotent, matches the source's `primeAudioContext()`
     /// deferred-init pattern) and plays a note. Called from the piano keyboard.
     func noteOn(id: Int, frequency: Float) {
-        audioEngineController.start()
+        onFirstNote?()
         core.noteOn(id: id, frequency: frequency)
     }
 

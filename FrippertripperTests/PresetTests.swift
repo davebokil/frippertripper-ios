@@ -4,7 +4,7 @@ import XCTest
 @MainActor
 final class PresetTests: XCTestCase {
     func testMakePresetCapturesCurrentEngineState() {
-        let engine = SynthEngine()
+        let engine = SynthEngine(core: SynthEngineCore())
         engine.vcoRange = .two
         engine.filterCutoff = 1234
         engine.echoTime = 1.5
@@ -19,7 +19,7 @@ final class PresetTests: XCTestCase {
     }
 
     func testApplyingPresetRestoresEngineState() {
-        let source = SynthEngine()
+        let source = SynthEngine(core: SynthEngineCore())
         source.vcoRange = .sixteen
         source.mixNoiseLevel = 0.8
         source.arpMode = .updown
@@ -27,7 +27,7 @@ final class PresetTests: XCTestCase {
         source.echoRepeat = 0.9
         let preset = source.makePreset(name: "Test")
 
-        let target = SynthEngine()
+        let target = SynthEngine(core: SynthEngineCore())
         XCTAssertNotEqual(target.vcoRange, .sixteen) // sanity: differs before applying
 
         target.apply(preset)
@@ -40,7 +40,7 @@ final class PresetTests: XCTestCase {
     }
 
     func testPresetRoundTripsThroughJSON() throws {
-        let engine = SynthEngine()
+        let engine = SynthEngine(core: SynthEngineCore())
         engine.vcoPwmSource = .lfo
         engine.lfoWaveform = .noise
         engine.vcaMode = .gate
@@ -57,10 +57,12 @@ final class PresetTests: XCTestCase {
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
         defer { defaults.removePersistentDomain(forName: suiteName) }
 
-        // SynthEngine.saveSession()/restoreLastSession() always read/write
-        // UserDefaults.standard, so verify the round-trip contract they rely on
-        // against an isolated suite rather than polluting .standard from the test run.
-        let source = SynthEngine()
+        // `SynthEngine.saveSession()`/`restoreLastSession()` always read/write
+        // `UserDefaults.standard` (this is per-launch app continuity, not the
+        // shared preset library - see `testPresetStoreSharesDataAcrossInstancesViaAppGroupSuite`
+        // for that), so verify the round-trip contract they rely on against an
+        // isolated suite rather than polluting `.standard` from the test run.
+        let source = SynthEngine(core: SynthEngineCore())
         source.vcoRange = .four
         source.filterCutoff = 2200
         source.echoRepeat = 0.6
@@ -71,7 +73,7 @@ final class PresetTests: XCTestCase {
         let reloadedData = try XCTUnwrap(defaults.data(forKey: "lastSession"))
         let reloaded = try JSONDecoder().decode(SynthPreset.self, from: reloadedData)
 
-        let target = SynthEngine()
+        let target = SynthEngine(core: SynthEngineCore())
         target.apply(reloaded)
 
         XCTAssertEqual(target.vcoRange, .four)
@@ -80,21 +82,108 @@ final class PresetTests: XCTestCase {
     }
 
     func testStoreSaveRenameDeleteAndPersistAcrossInstances() throws {
-        let suiteName = "PresetTests.\(UUID().uuidString)"
-        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
-        defer { defaults.removePersistentDomain(forName: suiteName) }
+        try withCleanPresetsStorage {
+            let store = PresetStore(seedIfEmpty: false)
+            let engine = SynthEngine(core: SynthEngineCore())
+            store.save(name: "Saved", from: engine)
 
-        // PresetStore always reads/writes UserDefaults.standard, so verify the
-        // round-trip contract it relies on (JSON array of SynthPreset persists and
-        // reloads correctly) against an isolated suite rather than polluting
-        // .standard from the test run.
-        let engine = SynthEngine()
-        let preset = engine.makePreset(name: "Saved")
-        let data = try JSONEncoder().encode([preset])
-        defaults.set(data, forKey: "presets")
+            guard let saved = store.presets.first(where: { $0.name == "Saved" }) else {
+                return XCTFail("expected a saved preset")
+            }
+            store.rename(saved, to: "Renamed")
+            XCTAssertTrue(store.presets.contains { $0.name == "Renamed" })
 
-        let reloadedData = try XCTUnwrap(defaults.data(forKey: "presets"))
-        let reloaded = try JSONDecoder().decode([SynthPreset].self, from: reloadedData)
-        XCTAssertEqual(reloaded, [preset])
+            store.delete(saved)
+            XCTAssertFalse(store.presets.contains { $0.id == saved.id })
+
+            // Reconstructing a store (standing in for a fresh launch) must see the
+            // same final state, proving persistence actually round-trips rather
+            // than only living in `store`'s in-memory array.
+            store.save(name: "Persisted", from: engine)
+            let reloaded = PresetStore(seedIfEmpty: false)
+            XCTAssertTrue(reloaded.presets.contains { $0.name == "Persisted" })
+        }
+    }
+
+    /// This is the actual mechanism `FrippertripperAU` depends on to share
+    /// presets with the host app (see docs/auv3-plan.md Stage 5): two
+    /// independently-constructed `PresetStore` instances against the real
+    /// `group.com.davebokil.frippertripper` suite, standing in for "the app" and
+    /// "the extension", must see each other's writes.
+    func testPresetStoreSharesDataAcrossInstancesViaAppGroupSuite() throws {
+        try withCleanPresetsStorage {
+            let appSideStore = PresetStore(seedIfEmpty: true)
+            XCTAssertEqual(appSideStore.presets.count, FactoryPresets.all.count)
+
+            appSideStore.save(name: "Shared From Host", from: SynthEngine(core: SynthEngineCore()))
+
+            // The extension never seeds - it must see the app's data purely via
+            // the shared suite.
+            let extensionSideStore = PresetStore(seedIfEmpty: false)
+            XCTAssertTrue(extensionSideStore.presets.contains { $0.name == "Shared From Host" })
+            XCTAssertEqual(extensionSideStore.presets.count, appSideStore.presets.count)
+        }
+    }
+
+    func testPresetStoreExtensionNeverSeedsWhenSuiteIsEmpty() throws {
+        try withCleanPresetsStorage {
+            // Simulates a host loading the extension before the containing app
+            // has ever launched once - must not race-seed the factory library
+            // itself (docs/auv3-plan.md Stage 0's `seedIfEmpty` rationale).
+            let store = PresetStore(seedIfEmpty: false)
+            XCTAssertTrue(store.presets.isEmpty)
+        }
+    }
+
+    func testPresetStoreMigratesLegacyStandardDataIntoAppGroupSuite() throws {
+        try withCleanPresetsStorage {
+            // A pre-App-Group install (already shipped to TestFlight before this
+            // migration existed) has its presets under `.standard`.
+            let legacyPreset = SynthEngine(core: SynthEngineCore()).makePreset(name: "Legacy")
+            let legacyData = try JSONEncoder().encode([legacyPreset])
+            UserDefaults.standard.set(legacyData, forKey: Self.presetsKey)
+
+            let store = PresetStore(seedIfEmpty: true)
+            XCTAssertEqual(store.presets.map(\.name), ["Legacy"])
+
+            // The migration must have actually landed in the group suite (so a
+            // second instance - the extension - sees it too), not just been held
+            // in this one instance's memory.
+            let groupDefaults = try XCTUnwrap(UserDefaults(suiteName: Self.appGroupSuiteName))
+            let migratedData = try XCTUnwrap(groupDefaults.data(forKey: Self.presetsKey))
+            let migrated = try JSONDecoder().decode([SynthPreset].self, from: migratedData)
+            XCTAssertEqual(migrated.map(\.name), ["Legacy"])
+        }
+    }
+
+    // MARK: - Helpers
+
+    private static let appGroupSuiteName = "group.com.davebokil.frippertripper"
+    private static let presetsKey = "com.davebokil.frippertripper.presets"
+
+    /// `PresetStore` hardcodes the real App-Group suite name (no test-only seam -
+    /// consistent with this project's minimal-abstraction style), so these tests
+    /// exercise that actual suite plus `.standard`. Snapshots and restores both so
+    /// a test run never permanently loses whatever this simulator's manually
+    /// launched app already had saved.
+    private func withCleanPresetsStorage(_ body: () throws -> Void) throws {
+        let groupDefaults = try XCTUnwrap(UserDefaults(suiteName: Self.appGroupSuiteName))
+        let originalGroupData = groupDefaults.data(forKey: Self.presetsKey)
+        let originalStandardData = UserDefaults.standard.data(forKey: Self.presetsKey)
+        groupDefaults.removeObject(forKey: Self.presetsKey)
+        UserDefaults.standard.removeObject(forKey: Self.presetsKey)
+        defer {
+            setOrRemove(originalGroupData, forKey: Self.presetsKey, in: groupDefaults)
+            setOrRemove(originalStandardData, forKey: Self.presetsKey, in: .standard)
+        }
+        try body()
+    }
+
+    private func setOrRemove(_ data: Data?, forKey key: String, in defaults: UserDefaults) {
+        if let data {
+            defaults.set(data, forKey: key)
+        } else {
+            defaults.removeObject(forKey: key)
+        }
     }
 }
