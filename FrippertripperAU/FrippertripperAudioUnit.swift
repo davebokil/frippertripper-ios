@@ -6,11 +6,27 @@ import AVFoundation
 /// the address<->property mapping, shared with `Frippertripper`/`FrippertripperTests`),
 /// plus a `fullState` override for host session save/restore (Stage 5).
 final class FrippertripperAudioUnit: AUAudioUnit {
+    /// Comfortably above any real host's block size (GarageBand for iOS uses
+    /// 256; 4096 covers even unusually large hosts) so the scratch buffer can be
+    /// allocated once, eagerly, in `init` - see `monoScratch`'s doc comment for
+    /// why that matters.
+    private static let maxScratchFrames = 4096
+
     private var outputBus: AUAudioUnitBus!
     private var _outputBusArray: AUAudioUnitBusArray!
     let core = SynthEngineCore()
-    private var monoScratch: UnsafeMutablePointer<Float>?
-    private var monoScratchCapacity = 0
+
+    /// Allocated eagerly here (like `core`), not deferred to
+    /// `allocateRenderResources()`. `internalRenderBlock`'s getter has no
+    /// documented guarantee it's only ever queried *after*
+    /// `allocateRenderResources()` has run - GarageBand for iOS, confirmed by
+    /// on-device testing, reads it once early and caches whatever block comes
+    /// back for the AU's entire lifetime, never re-querying it. A version of
+    /// this that deferred allocation and returned a placeholder no-op block
+    /// when `monoScratch` wasn't ready yet was silently, permanently broken as
+    /// a result: `allocateRenderResources` would succeed, but the real render
+    /// block backing MIDI/audio would simply never run again.
+    private let monoScratch = UnsafeMutablePointer<Float>.allocate(capacity: FrippertripperAudioUnit.maxScratchFrames)
     private let parameterCache = ParameterValueCache(defaults: AUParameterTreeBuilder.defaultParameterValues())
 
     override init(componentDescription: AudioComponentDescription, options: AudioComponentInstantiationOptions = []) throws {
@@ -50,30 +66,21 @@ final class FrippertripperAudioUnit: AUAudioUnit {
 
         core.prepare(sampleRate: outputBus.format.sampleRate)
 
-        // Never render `SynthEngineCore` twice per block - that would double-advance
-        // oscillator/envelope/`RampedParameter` state, which is real per-sample
-        // mutable state. Render once into this mono scratch buffer, then duplicate
-        // into every output channel. Allocated here / freed in
-        // `deallocateRenderResources`, never inside `internalRenderBlock`.
-        let capacity = Int(maximumFramesToRender)
-        let scratch = UnsafeMutablePointer<Float>.allocate(capacity: capacity)
-        scratch.initialize(repeating: 0, count: capacity)
-        monoScratch = scratch
-        monoScratchCapacity = capacity
-    }
-
-    override func deallocateRenderResources() {
-        monoScratch?.deallocate()
-        monoScratch = nil
-        monoScratchCapacity = 0
-        super.deallocateRenderResources()
-    }
-
-    override var internalRenderBlock: AUInternalRenderBlock {
-        guard let monoScratch else {
-            return { _, _, _, _, _, _, _ in kAudioUnitErr_Uninitialized }
+        guard maximumFramesToRender <= AUAudioFrameCount(Self.maxScratchFrames) else {
+            throw NSError(domain: NSOSStatusErrorDomain, code: Int(kAudioUnitErr_TooManyFramesToProcess))
         }
-        return Self.makeRenderBlock(core: core, parameterCache: parameterCache, monoScratch: monoScratch, scratchCapacity: monoScratchCapacity)
+    }
+
+    deinit {
+        monoScratch.deallocate()
+    }
+
+    /// Never render `SynthEngineCore` twice per block - that would double-advance
+    /// oscillator/envelope/`RampedParameter` state, which is real per-sample
+    /// mutable state. Render once into `monoScratch`, then duplicate into every
+    /// output channel.
+    override var internalRenderBlock: AUInternalRenderBlock {
+        Self.makeRenderBlock(core: core, parameterCache: parameterCache, monoScratch: monoScratch, scratchCapacity: Self.maxScratchFrames)
     }
 
     /// `nonisolated` and `static` (captures no `self`) so the returned block carries

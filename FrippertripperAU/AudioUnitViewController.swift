@@ -5,8 +5,9 @@ import SwiftUI
 /// `info.properties`) — hosts must be able to instantiate this to get at
 /// `createAudioUnit(with:)`, and it doubles as the view controller a host
 /// presents for the plugin's own UI. Hosts don't guarantee the order of
-/// `createAudioUnit(with:)` vs. `viewDidLoad` (Apple's own AUv3 template guards
-/// both directions), so `connectViewToAudioUnitIfPossible` is called from both.
+/// `createAudioUnit(with:)` vs. `viewDidLoad` (confirmed on-device: GarageBand
+/// for iOS calls `viewDidLoad` first), so `connectViewToAudioUnitIfPossible` is
+/// called from both, guarded to only actually attach once both are ready.
 final class AudioUnitViewController: AUViewController, AUAudioUnitFactory {
     // `AUAudioUnitFactory.createAudioUnit(with:)` is a nonisolated protocol
     // requirement, but `AUViewController` (a `UIViewController` subclass) is
@@ -19,6 +20,11 @@ final class AudioUnitViewController: AUViewController, AUAudioUnitFactory {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        // Hosts (GarageBand in particular) size the container from this before
+        // ever showing the view - without it there's no frame to hand the
+        // hosted SwiftUI content, and the host silently skips the custom UI
+        // instead of presenting a zero-size view.
+        preferredContentSize = CGSize(width: 420, height: 700)
         connectViewToAudioUnitIfPossible()
     }
 
