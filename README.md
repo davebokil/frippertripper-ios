@@ -27,7 +27,7 @@ zero-AVFoundation DSP engine.
 - **FX rack** — echo (time/repeat/volume) and a limiter (threshold/ceiling)
 - **On-screen keyboard** — glissando-capable, adjustable octave range/span,
   and a Hold mode that latches notes so both hands stay free for the panel
-- **Patch management** — 20 factory presets, save/rename/delete your own,
+- **Patch management** — 100 factory presets, save/rename/delete your own,
   Init (reset to default), Random (randomize the whole front panel), and the
   current patch is remembered across app launches
 
