@@ -83,7 +83,7 @@ final class PresetTests: XCTestCase {
 
     func testStoreSaveRenameDeleteAndPersistAcrossInstances() throws {
         try withCleanPresetsStorage {
-            let store = PresetStore(seedIfEmpty: false)
+            let store = PresetStore()
             let engine = SynthEngine(core: SynthEngineCore())
             store.save(name: "Saved", from: engine)
 
@@ -100,7 +100,7 @@ final class PresetTests: XCTestCase {
             // same final state, proving persistence actually round-trips rather
             // than only living in `store`'s in-memory array.
             store.save(name: "Persisted", from: engine)
-            let reloaded = PresetStore(seedIfEmpty: false)
+            let reloaded = PresetStore()
             XCTAssertTrue(reloaded.presets.contains { $0.name == "Persisted" })
         }
     }
@@ -112,26 +112,32 @@ final class PresetTests: XCTestCase {
     /// "the extension", must see each other's writes.
     func testPresetStoreSharesDataAcrossInstancesViaAppGroupSuite() throws {
         try withCleanPresetsStorage {
-            let appSideStore = PresetStore(seedIfEmpty: true)
+            let appSideStore = PresetStore()
             XCTAssertEqual(appSideStore.presets.count, FactoryPresets.all.count)
 
             appSideStore.save(name: "Shared From Host", from: SynthEngine(core: SynthEngineCore()))
 
-            // The extension never seeds - it must see the app's data purely via
-            // the shared suite.
-            let extensionSideStore = PresetStore(seedIfEmpty: false)
+            let extensionSideStore = PresetStore()
             XCTAssertTrue(extensionSideStore.presets.contains { $0.name == "Shared From Host" })
             XCTAssertEqual(extensionSideStore.presets.count, appSideStore.presets.count)
         }
     }
 
-    func testPresetStoreExtensionNeverSeedsWhenSuiteIsEmpty() throws {
+    /// Regression test for a real bug found on-device: a user who loads the
+    /// plugin in a host before ever launching the standalone app once (an
+    /// entirely ordinary thing to do) would previously see the factory bank
+    /// permanently missing, because only the app was allowed to seed it and by
+    /// the time it launched, the extension had already made the App-Group
+    /// container non-empty with just the user's own saved presets. Either side
+    /// constructing first against a truly empty container must seed - see
+    /// `PresetStore`'s doc comment.
+    func testPresetStoreSeedsFactoryPresetsWhenExtensionConstructsFirst() throws {
         try withCleanPresetsStorage {
-            // Simulates a host loading the extension before the containing app
-            // has ever launched once - must not race-seed the factory library
-            // itself (docs/auv3-plan.md Stage 0's `seedIfEmpty` rationale).
-            let store = PresetStore(seedIfEmpty: false)
-            XCTAssertTrue(store.presets.isEmpty)
+            // Simulates "the extension loads before the app has ever launched" -
+            // this used to leave `presets` empty; it must now seed like any other
+            // first-ever construction against an empty container.
+            let store = PresetStore()
+            XCTAssertEqual(store.presets.count, FactoryPresets.all.count)
         }
     }
 
@@ -143,7 +149,7 @@ final class PresetTests: XCTestCase {
             let legacyData = try JSONEncoder().encode([legacyPreset])
             UserDefaults.standard.set(legacyData, forKey: Self.presetsKey)
 
-            let store = PresetStore(seedIfEmpty: true)
+            let store = PresetStore()
             XCTAssertEqual(store.presets.map(\.name), ["Legacy"])
 
             // The migration must have actually landed in the group suite (so a

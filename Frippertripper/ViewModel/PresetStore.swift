@@ -10,6 +10,19 @@ import Observation
 /// so the AUv3 extension's own sandbox can see the same preset library as the host
 /// app. Falls back to `.standard` if the suite is ever unavailable (e.g. entitlement
 /// not yet provisioned) rather than silently losing the preset library.
+///
+/// Either side - the standalone app or the AUv3 extension - may seed the factory
+/// library, whichever constructs this first against a truly empty (no data key at
+/// all) App-Group container. An earlier version restricted seeding to the app
+/// only, reasoning that letting both sides seed risked a race - but the actual
+/// worst case of a race is both sides writing the identical canonical
+/// `FactoryPresets.all`, which is harmless. Restricting it to the app was worse in
+/// practice, and was confirmed as a real bug via on-device testing: a user who
+/// loads the plugin in a host (GarageBand, AUM) before ever launching the app once
+/// - a completely ordinary thing to do - would have the extension populate the
+/// container with just their own saved presets, and the app would then see "data
+/// already exists" and skip seeding forever, making the factory bank look
+/// permanently missing.
 @MainActor
 @Observable
 final class PresetStore {
@@ -18,13 +31,10 @@ final class PresetStore {
     private static let appGroupSuiteName = "group.com.davebokil.frippertripper"
     private let defaults: UserDefaults
 
-    /// `seedIfEmpty` is `false` for the AUv3 extension: it must never seed factory
-    /// presets itself, to avoid a race where a host loads the extension before the
-    /// containing app has ever launched once (and so never populated the suite).
-    init(seedIfEmpty: Bool = true) {
+    init() {
         defaults = UserDefaults(suiteName: Self.appGroupSuiteName) ?? .standard
         migrateFromStandardIfNeeded()
-        load(seedIfEmpty: seedIfEmpty)
+        load()
     }
 
     /// One-time migration for installs from before the App Group suite existed:
@@ -66,10 +76,9 @@ final class PresetStore {
         defaults.set(data, forKey: defaultsKey)
     }
 
-    private func load(seedIfEmpty: Bool) {
+    private func load() {
         guard let data = defaults.data(forKey: defaultsKey),
               let decoded = try? JSONDecoder().decode([SynthPreset].self, from: data) else {
-            guard seedIfEmpty else { return }
             presets = FactoryPresets.all
             persist()
             return

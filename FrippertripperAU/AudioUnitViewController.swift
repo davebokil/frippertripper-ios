@@ -17,6 +17,12 @@ final class AudioUnitViewController: AUViewController, AUAudioUnitFactory {
     // before anything else touches `audioUnit`.
     nonisolated(unsafe) private var audioUnit: FrippertripperAudioUnit?
     private var hostingController: UIHostingController<FrippertripperAUPanelView>?
+    // May seed the factory preset library itself if the App-Group container is
+    // still completely empty (e.g. a host loads this extension before the
+    // containing app has ever launched once) - see `PresetStore`'s doc comment
+    // for why that's safe. Constructed once per view-controller instance,
+    // alongside `hostingController`, in `connectViewToAudioUnitIfPossible`.
+    private var presetStore: PresetStore?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -47,7 +53,9 @@ final class AudioUnitViewController: AUViewController, AUAudioUnitFactory {
         // tree instead of writing `core` directly (see `SynthEngine.route(_:_:)`).
         let engine = SynthEngine(core: audioUnit.core)
         engine.auParameterTree = audioUnit.parameterTree
-        let hosting = UIHostingController(rootView: FrippertripperAUPanelView(engine: engine))
+        let presetStore = PresetStore()
+        self.presetStore = presetStore
+        let hosting = UIHostingController(rootView: FrippertripperAUPanelView(engine: engine, presetStore: presetStore))
         addChild(hosting)
         hosting.view.frame = view.bounds
         hosting.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
